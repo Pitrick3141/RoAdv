@@ -45,41 +45,63 @@ class Globles:
         角色素材
         """
 
-        self._chara_images = {'yichen': [[], [], []]}
+        self._chara_images = {'yichen': [[], [], [], [], []]}
         for i in range(1, 12):
             self._chara_images['yichen'][0].append(pygame.image.load("images\\chara\\yichen\\idle_{}.png".format(i)))
         for i in range(1, 7):
             self._chara_images['yichen'][1].append(pygame.image.load("images\\chara\\yichen\\walk_{}.png".format(i)))
         for i in range(1, 9):
             self._chara_images['yichen'][2].append(pygame.image.load("images\\chara\\yichen\\attack_{}.png".format(i)))
+        for i in range(1, 13):
+            self._chara_images['yichen'][3].append(pygame.image.load("images\\chara\\yichen\\skill1_{}.png".format(i)))
+        for i in range(1, 10):
+            self._chara_images['yichen'][4].append(pygame.image.load("images\\chara\\yichen\\skill2_{}.png".format(i)))
 
-        self._chara_images['jie'] = [[], [], []]
+        self._chara_images['jie'] = [[], [], [], [], []]
         for i in range(1, 7):
             self._chara_images['jie'][0].append(pygame.image.load("images\\chara\\jie\\idle_{}.png".format(i)))
         for i in range(1, 9):
             self._chara_images['jie'][1].append(pygame.image.load("images\\chara\\jie\\walk_{}.png".format(i)))
         for i in range(1, 6):
             self._chara_images['jie'][2].append(pygame.image.load("images\\chara\\jie\\attack_{}.png".format(i)))
+        for i in range(1, 7):
+            self._chara_images['jie'][3].append(pygame.image.load("images\\chara\\jie\\skill1_{}.png".format(i)))
+        for i in range(1, 25):
+            self._chara_images['jie'][4].append(pygame.image.load("images\\chara\\jie\\skill2_{}.png".format(i)))
 
         """
         角色攻击/技能偏移参数，用于调整图片显示位置
         """
-        self._chara_attack_adjustment = {'yichen': [(-30, -30)],
-                                         'yichen_reverse': [(-80, -30)],
-                                         'jie': [(-10, -10)],
-                                         'jie_reverse': [(-30, -10)]}
+        self._chara_attack_adjustment = {'yichen': [(-40, -27), (-40, -20), (-40, -27)],
+                                         'yichen_reverse': [(-90, -27), (-75, -20), (-90, -27)],
+                                         'jie': [(-10, -15), (-10, -15), (-15, -15)],
+                                         'jie_reverse': [(-25, -15), (-40, -15), (-20, -15)]}
 
         """
         角色属性
-        [速度, 攻速, 最大生命, 攻击力, 防御力]
+        [速度, 攻速, 最大生命, 攻击力, 防御力, 技能冷却]
         """
-        self._chara_stat = {'yichen': [3, 100, 20, 5, 2],
-                            'jie': [6, 75, 30, 3, 5]}
+        self._chara_stat = {'yichen': [3, 130, 20, 5, 2, [3500, 8000]],
+                            'jie': [6, 100, 30, 3, 5, [4000, 10000]]}
+
+        """
+        特效素材
+        """
+
+        self._effect_images = {'fireball': [],
+                               'wind': []}
+        for i in range(1, 19):
+            self._effect_images['fireball'].append(pygame.image.load("images\\effects\\fireball_{}.png".format(i)))
+        for i in range(1, 18):
+            self._effect_images['wind'].append(pygame.image.load("images\\effects\\wind_{}.png".format(i)))
 
         """
         精灵列表
         """
         self._all_sprites_list = pygame.sprite.LayeredUpdates()
+        self._bullet_list = pygame.sprite.Group()
+        self._monster_list = pygame.sprite.Group()
+        self._item_list = pygame.sprite.Group()
 
     def next_stage(self):
         # 进入下一个阶段
@@ -124,9 +146,18 @@ class Globles:
             debug("请求的{}角色素材不存在".format(chara), type='error', who=self.__class__.__name__)
         return chara_img
 
-    def add_sprite(self, sprite, layers):
+    def get_effect_image(self, eff):
+        # 获取特效素材
+        eff_img = None
+        if eff in self._effect_images.keys():
+            eff_img = self._effect_images.get(eff)
+        else:
+            debug("请求的{}角色素材不存在".format(eff), type='error', who=self.__class__.__name__)
+        return eff_img
+
+    def add_sprite(self, sprite, layer):
         # 添加精灵到精灵列表
-        self._all_sprites_list.add(sprite, layers=layers)
+        self._all_sprites_list.add(sprite, layer=layer)
 
     def remove_sprite(self, sprite):
         # 从精灵列表移除精灵
@@ -140,6 +171,34 @@ class Globles:
         # 绘制精灵列表
         self._all_sprites_list.draw(screen)
 
+    def add_bullet(self, sprite, layer):
+        # 添加子弹到子弹列表
+        self._bullet_list.add(sprite)
+        self._all_sprites_list.add(sprite, layer=layer)
+
+    def remove_bullet(self, sprite):
+        # 从子弹列表移除子弹
+        self._bullet_list.remove(sprite)
+        self._all_sprites_list.remove(sprite)
+
+    def get_bullet_list(self):
+        # 返回子弹列表
+        return self._bullet_list
+
+    def add_monster(self, sprite):
+        # 添加敌人到敌人列表
+        self._monster_list.add(sprite)
+        self._all_sprites_list.add(sprite, layer=2)
+
+    def remove_monster(self, sprite):
+        # 从敌人列表移除敌人
+        self._monster_list.remove(sprite)
+        self._all_sprites_list.remove(sprite)
+
+    def get_monster_list(self):
+        # 返回敌人列表
+        return self._monster_list
+
     def get_attack_adjustment(self, hero_name, attack_index, reflect):
         # 获取攻击偏移参数
         if reflect:
@@ -149,6 +208,18 @@ class Globles:
 
     def get_chara_stat(self, hero_name, stat_index):
         return self._chara_stat[hero_name][stat_index]
+
+    def bulletMech(self):
+        enemy_hit_list = []
+        (screen_w, screen_h) = self._screen_size
+        for bullet in self._bullet_list:
+            enemy_hit_list = pygame.sprite.spritecollide(bullet, self._monster_list, False)
+            # Remove the bullet if it flies up off the screen
+            if not 0 < bullet.rect.x < screen_w or not 0 < bullet.rect.y < screen_h and bullet.self_destroy:
+                self.remove_bullet(bullet)
+            for enemy in enemy_hit_list:
+                # enemy.hp -= bullet.damage
+                self.remove_bullet(bullet)
 
 
 def init():
@@ -213,8 +284,8 @@ def get_chara_image(chara):
     return globles.get_chara_image(chara)
 
 
-def add_sprite(sprite, layers=0):
-    globles.add_sprite(sprite, layers)
+def add_sprite(sprite, layer=0):
+    globles.add_sprite(sprite, layer)
 
 
 def remove_sprite(sprite):
@@ -235,3 +306,27 @@ def get_attack_adjustment(hero_name, attack_index, reflect):
 
 def get_chara_stat(hero_name, stat_index):
     return globles.get_chara_stat(hero_name, stat_index)
+
+
+def add_bullet(bullet, layer=3):
+    globles.add_bullet(bullet, layer)
+
+
+def remove_bullet(bullet):
+    globles.remove_bullet(bullet)
+
+
+def get_bullet_list():
+    return globles.get_bullet_list()
+
+
+def get_monster_list():
+    return globles.get_monster_list()
+
+
+def bulletMech():
+    globles.bulletMech()
+
+
+def get_effect_image(eff):
+    return globles.get_effect_image(eff)

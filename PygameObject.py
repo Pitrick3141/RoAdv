@@ -52,29 +52,52 @@ class Character(PygameObject):
         self.hp = self.max_hp
         self.last_move = -1
         self.halt = False
-        self.is_attacking = False
+        self.is_attacking = -1
         self.attack_speed = Globles.get_chara_stat(hero_name, 1)
         self.attack = Globles.get_chara_stat(hero_name, 3)
         self.defence = Globles.get_chara_stat(hero_name, 4)
         self.attack_x = 0
         self.attack_y = 0
+        self.skills_cd = Globles.get_chara_stat(hero_name, 5)
+        self.skill1_cast = 0
+        self.skill2_cast = 0
+        self.bullet_launched = False
 
     def update(self, screen):
-        if self.is_attacking:
+        if self.is_attacking != -1:
             if pygame.time.get_ticks() - self.last_move >= self.attack_speed * len(self.imageset[self.gesture]):
-                self.is_attacking = False
+                if self.is_attacking == 1:
+                    self.skill1_cast = pygame.time.get_ticks()
+                elif self.is_attacking == 2:
+                    self.skill2_cast = pygame.time.get_ticks()
+                self.is_attacking = -1
                 self.gesture = 0
                 self.halt = True
                 self.rect.x = self.attack_x
                 self.rect.y = self.attack_y
                 self.image = self.imageset[0][0]
             else:
-                self.image = self.imageset[self.gesture][(pygame.time.get_ticks() - self.last_move) // self.attack_speed % len(self.imageset[self.gesture])]
-                (att_adj_x, att_adj_y) = Globles.get_attack_adjustment(self.hero_name, 0, self.reflect)
+                image_index = (pygame.time.get_ticks() - self.last_move) // self.attack_speed % len(self.imageset[self.gesture])
+                self.image = self.imageset[self.gesture][image_index]
+                (att_adj_x, att_adj_y) = Globles.get_attack_adjustment(self.hero_name, self.is_attacking, self.reflect)
                 self.rect.x = self.attack_x + att_adj_x
                 self.rect.y = self.attack_y + att_adj_y
                 if self.reflect:
                     self.image = pygame.transform.flip(self.image, True, False)
+                if image_index == 1 and not self.bullet_launched:
+                    if self.hero_name == 'jie':
+                        if self.is_attacking == 1:
+                            bullet = Bullet('fireball', 5, self.reflect, 5, False, 50, True)
+                            bullet.rect.x = (self.attack_x - 20) if self.reflect else (self.attack_x + 20)
+                            bullet.rect.y = self.attack_y - 20
+                            Globles.add_bullet(bullet)
+                            self.bullet_launched = True
+                        elif self.is_attacking == 2:
+                            bullet = Bullet('wind', 0, self.reflect, 5, False, 150, False)
+                            bullet.rect.x = self.attack_x - 70
+                            bullet.rect.y = self.attack_y - 70
+                            Globles.add_bullet(bullet, 0)
+                            self.bullet_launched = True
         elif not self.halt:
             self.image = self.imageset[self.gesture][pygame.time.get_ticks() // 200 % len(self.imageset[self.gesture])]
             if self.reflect:
@@ -83,15 +106,31 @@ class Character(PygameObject):
             self.image = self.imageset[0][0]
             if self.reflect:
                 self.image = pygame.transform.flip(self.image, True, False)
-        if self.is_attacking:
+        if self.is_attacking != -1:
             ShowHP(screen, self.attack_x, self.attack_y, self.hp, self.max_hp)
         else:
             ShowHP(screen, self.rect.x, self.rect.y, self.hp, self.max_hp)
         key_list = pygame.key.get_pressed()
-        if self.isMoveAllowed and not self.is_attacking:
-            if key_list[pygame.K_j]:
+        if self.isMoveAllowed and self.is_attacking == -1:
+            if key_list[pygame.K_o] and pygame.time.get_ticks() - self.skill2_cast > self.skills_cd[1]:
                 self.halt = False
-                self.is_attacking = True
+                self.is_attacking = 2
+                self.attack_x = self.rect.x
+                self.attack_y = self.rect.y
+                self.gesture = 4
+                self.last_move = pygame.time.get_ticks()
+                self.bullet_launched = False
+            elif key_list[pygame.K_i] and pygame.time.get_ticks() - self.skill1_cast > self.skills_cd[0]:
+                self.halt = False
+                self.is_attacking = 1
+                self.attack_x = self.rect.x
+                self.attack_y = self.rect.y
+                self.gesture = 3
+                self.last_move = pygame.time.get_ticks()
+                self.bullet_launched = False
+            elif key_list[pygame.K_j]:
+                self.halt = False
+                self.is_attacking = 0
                 self.attack_x = self.rect.x
                 self.attack_y = self.rect.y
                 self.gesture = 2
@@ -109,6 +148,37 @@ class Character(PygameObject):
                 self.idle()
             else:
                 self.halt = True
+
+
+class Bullet(pygame.sprite.Sprite):
+    """ This class represents the bullet . """
+
+    def __init__(self, effect_name, speed, reflect, damage, simple, effect_speed, self_destroy):
+        # Call the parent class (Sprite) constructor
+        super().__init__()
+
+        self.imageset = Globles.get_effect_image(effect_name)
+        self.image = self.imageset[0]
+        self.speed = speed
+        self.effect_speed = effect_speed
+        self.rect = self.image.get_rect()
+        self.reflect = reflect
+        self.simple = simple
+        self.damage = damage
+        self.create_time = pygame.time.get_ticks()
+        self.self_destroy = self_destroy
+
+    def update(self, screen):
+        if self.reflect:
+            self.rect.x -= self.speed
+        else:
+            self.rect.x += self.speed
+        if not self.simple:
+            self.image = self.imageset[(pygame.time.get_ticks() - self.create_time) // self.effect_speed % len(self.imageset)]
+        if self.reflect:
+            self.image = pygame.transform.flip(self.image, True, False)
+        if pygame.time.get_ticks() - self.create_time >= len(self.imageset) * self.effect_speed:
+            Globles.remove_bullet(self)
 
 
 def ShowHP(screen, x, y, hp, max_hp):

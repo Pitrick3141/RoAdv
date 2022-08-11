@@ -33,7 +33,7 @@ class FormReady:
 
         self.hero = PygameObject.Character('yichen', 30, 60)
 
-        Globles.add_sprite(self.hero)
+        Globles.add_sprite(self.hero, 1)
 
         debug("准备页面初始化完成", type='success', who=self.__class__.__name__)
 
@@ -51,7 +51,7 @@ class FormReady:
                     self.done = True
                 if event.type == pygame.KEYDOWN:
                     key_list = pygame.key.get_pressed()
-                    if key_list[pygame.K_h] and not self.hero.is_attacking:
+                    if key_list[pygame.K_h] and self.hero.is_attacking == -1:
                         if self.hero_index < len(self.hero_list) - 1:
                             self.hero_index += 1
                         else:
@@ -64,7 +64,7 @@ class FormReady:
                         if self.hero.reflect:
                             new_hero.reflect = True
                         self.hero = new_hero
-                        Globles.add_sprite(self.hero)
+                        Globles.add_sprite(self.hero, 1)
                         debug("已将英雄切换为{}".format(self.hero_display_name[self.hero_index]), type='success',
                               who=self.__class__.__name__)
 
@@ -85,8 +85,22 @@ class FormReady:
                                                                            self.hero.defence),
                               20, 280, bold=False, size=20, color='black')
 
-            Globles.update_sprites(self.screen)
+            Globles.show_text(self.screen, "Skill 1 Press I, Cooldown: ({}/{})".format(
+                (pygame.time.get_ticks() - self.hero.skill1_cast)//100
+                if pygame.time.get_ticks() - self.hero.skill1_cast < self.hero.skills_cd[0]
+                else self.hero.skills_cd[0]//100,
+                self.hero.skills_cd[0]//100),
+                              20, 310, bold=False, size=20, color='black')
 
+            Globles.show_text(self.screen, "Skill 2 Press O, Cooldown: ({}/{})".format(
+                (pygame.time.get_ticks() - self.hero.skill2_cast)//100
+                if pygame.time.get_ticks() - self.hero.skill2_cast < self.hero.skills_cd[1]
+                else self.hero.skills_cd[1]//100,
+                self.hero.skills_cd[1]//100),
+                              20, 340, bold=False, size=20, color='black')
+
+            Globles.update_sprites(self.screen)
+            Globles.bulletMech()
             Globles.draw_sprites(self.screen)
 
             # 更新页面
