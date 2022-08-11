@@ -41,8 +41,10 @@ class FormHome:
         # 在主页面上显示文本
         color = kwargs.get('color') if 'color' in kwargs.keys() else globles.title_blue
         alpha = kwargs.get('alpha') if 'alpha' in kwargs.keys() else 255
-        size = kwargs.get('size') if 'size' in kwargs.keys() else 30
-        font = pygame.font.SysFont('Calibri', size, True, False)
+        size = kwargs.get('size') if 'size' in kwargs.keys() else 25
+        is_bold = kwargs.get('bold') if 'bold' in kwargs.keys() else True
+        is_italic = kwargs.get('italic') if 'italic' in kwargs.keys() else False
+        font = pygame.font.SysFont('Microsoft Yahei', size, is_bold, is_italic)
         text = font.render(content, True, color)
         text.set_alpha(alpha)
         self.screen.blit(text, [x, y])
@@ -61,14 +63,13 @@ class FormHome:
         click_alpha = 0
         click_color = globles.black
         about_alpha = 0
-        about_alpha_2 = 0
-        about_alpha_3 = 0
         reverse = 0
 
         # 循环文本
-        about_texts = ["By Jeff Z. and Yichen W.",
+        about_texts = ["By Jie Z. and Yichen W.",
                        "For our beloved lovely girlfriends",
-                       "Happy Birthday!"]
+                       "Happy Birthday!",
+                       "生日快乐！"]
         about_index = 0
         about_reverse = 0
 
@@ -116,7 +117,7 @@ class FormHome:
                     reverse *= -1
                 click_alpha += 5 * reverse
             if self.stage >= 2:
-                self.show_text(about_texts[about_index], 20, 70, color=globles.black, alpha=about_alpha, size=15)
+                self.show_text(about_texts[about_index], 20, 70, color=globles.black, alpha=about_alpha, size=15, bold=False)
                 if about_reverse == 0:
                     about_alpha += 3
                     if about_alpha > 255:
