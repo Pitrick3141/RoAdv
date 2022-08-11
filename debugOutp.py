@@ -19,8 +19,10 @@ def debug(text: str, **kwargs):
 
     # 信息来源
     info_from = "未知来源"
+    if kwargs.get('who') == 'main':
+        info_from = "主程序"
     if kwargs.get('who') == 'FormHome':
-        info_from = "主页面"
+        info_from = "开始页面"
 
     # 错误信息
     if kwargs.get('type') == 'error':
@@ -31,10 +33,11 @@ def debug(text: str, **kwargs):
     # 成功信息
     elif kwargs.get('type') == 'success':
         output_message = " [Success@{}] {}".format(info_from, text)
+    # 作者言
     elif kwargs.get('type') == 'Jie_Z':
-        output_message = " [Jie Zhang] {}".format(text)
+        output_message = " Jie Zhang: \"{}\"".format(text)
     elif kwargs.get('type') == 'Yichen_W':
-        output_message = " [Yichen Wang] {}".format(text)
+        output_message = " Yichen Wang: \"{}\"".format(text)
     # 其他信息
     else:
         output_message = " [Info@{}] {}".format(info_from, text)

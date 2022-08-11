@@ -23,8 +23,8 @@ class FormHome:
         self.done = False
 
         # 当前阶段和进入各个阶段的时间
-        self.stage = 0
-        self.enter_stage = [pygame.time.get_ticks()]
+        self.stage = -1
+        self.enter_stage = []
 
         debug("开始页面初始化完成", type='success', who=self.__class__.__name__)
         debug("新的开始", type='Jie_Z')
@@ -34,6 +34,11 @@ class FormHome:
         self.stage += 1
         # 记录阶段开始的时间
         self.enter_stage.append(pygame.time.get_ticks())
+        debug("进入阶段{},当前时刻{}".format(self.stage, self.enter_stage[self.stage]), who=self.__class__.__name__)
+        if self.stage == 1:
+            debug("我们都将在一次次尝试中走向明天，走向我们的路。", type='Yichen_W')
+        if self.stage == 2:
+            debug("我曾说过编程就像作曲，而今这首曲为爱而谱。", type='Yichen_W')
 
     def get_span(self):
         # 返回从进入阶段到现在的时间
@@ -71,6 +76,7 @@ class FormHome:
 
         debug("进入开始页面循环体", who=self.__class__.__name__)
         debug("生命中每一个伟大都源于一次尝试。", type='Jie_Z')
+        self.next_stage()
 
         # 动画参数，用于文本动画等
         ro_x = 20
@@ -84,9 +90,15 @@ class FormHome:
 
         # 循环文本列表
         about_texts = ["By Jie Z. and Yichen W.",
-                       "For our beloved lovely girlfriends",
+                       "For our beloved and lovely girlfriends",
                        "Happy Birthday!",
-                       "生日快乐！"]
+                       "生日快乐！",
+                       "お誕生日おめでとう!",
+                       "Joyeux anniversaire!",
+                       "人间烟火，山河远阔",
+                       "无一是你，无一不是你",
+                       "水有舟可渡，山有径可寻",
+                       "所爱隔山海，山海皆可平"]
 
         # 当前显示的循环文本序号
         about_index = 0
@@ -101,9 +113,11 @@ class FormHome:
             for event in pygame.event.get():
                 # 退出程序
                 if event.type == pygame.QUIT:
+                    debug("触发退出事件,当前时刻{}".format(pygame.time.get_ticks()), who=self.__class__.__name__)
                     self.done = True
                 # 点击鼠标
                 if event.type == pygame.MOUSEBUTTONDOWN:
+                    debug("触发鼠标点击事件,当前时刻{}".format(pygame.time.get_ticks()), who=self.__class__.__name__)
                     if self.stage == 0:
                         click_alpha = 255
                         reverse = 0
@@ -167,15 +181,17 @@ class FormHome:
                     else:
                         # 完成一次循环
                         about_index = 0
+                    if about_index == 2:
+                        # 后面的太长了可以提前点击屏幕继续
                         about_finished = True
                 about_alpha += 3 * about_reverse
 
             # 开始页面标题文本
-            self.show_text("Welcome to", 20, 10)
+            self.show_text("Welcome to the", 20, 10)
             self.show_text("Ro", ro_x, 40)
             self.show_text("mantic", 55, man_y, color=globles.title_red)
             self.show_text("Adv", adv_x, 40)
-            self.show_text("enture", 195, en_y, color=globles.title_red)
+            self.show_text("enture !", 195, en_y, color=globles.title_red)
 
             # 点击开始提示文本
             self.show_text("*Click to Start*", 250, 250, color=click_color, alpha=click_alpha)
@@ -187,6 +203,7 @@ class FormHome:
             self.clock.tick(60)
 
         # 关闭页面
+        debug("开始页面播放完成", type='success', who=self.__class__.__name__)
         pygame.quit()
 
 
