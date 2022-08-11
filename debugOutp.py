@@ -23,6 +23,10 @@ def debug(text: str, **kwargs):
         info_from = "主程序"
     if kwargs.get('who') == 'FormHome':
         info_from = "开始页面"
+    if kwargs.get('who') == 'FormReady':
+        info_from = '准备页面'
+    if kwargs.get('who') == 'Globles':
+        info_from = '全局'
 
     # 错误信息
     if kwargs.get('type') == 'error':
