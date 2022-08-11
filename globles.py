@@ -1,4 +1,3 @@
-import pygame
 # 全局变量
 
 """
@@ -23,12 +22,3 @@ size = (width, height)
 """
 
 screen_size = (700, 500)
-
-"""
-字体
-"""
-
-
-def show_text(screen, content: str, font, x, y):
-    text = font.render(content, True, black)
-    screen.blit(text, [x, y])

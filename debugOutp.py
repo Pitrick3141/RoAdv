@@ -31,8 +31,13 @@ def debug(text: str, **kwargs):
     # 成功信息
     elif kwargs.get('type') == 'success':
         output_message = " [Success@{}] {}".format(info_from, text)
+    elif kwargs.get('type') == 'Jie_Z':
+        output_message = " [Jie Zhang] {}".format(text)
+    elif kwargs.get('type') == 'Yichen_W':
+        output_message = " [Yichen Wang] {}".format(text)
     # 其他信息
     else:
         output_message = " [Info@{}] {}".format(info_from, text)
 
+    # 输出调试信息
     print(current_time + output_message)
