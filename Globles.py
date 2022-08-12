@@ -1,5 +1,6 @@
 # 全局变量和函数
 import pygame
+import sys
 import pathlib
 from debugOutp import debug
 
@@ -252,6 +253,8 @@ def show_text(screen, content: str, x, y, **kwargs):
 
     # 字体 微软雅黑
     font = pygame.font.SysFont('Microsoft Yahei', size, is_bold, is_italic)
+    if sys.platform != 'win32':
+        font = pygame.font.Font('Yahei.ttf', size)
 
     # 文字渲染 抗锯齿开启
     text = font.render(content, True, color_rgb)
