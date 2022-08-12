@@ -1,5 +1,6 @@
 # 全局变量和函数
 import pygame
+import pathlib
 from debugOutp import debug
 
 global globles
@@ -44,30 +45,31 @@ class Globles:
         """
         角色素材
         """
+        self._chara_path = pathlib.Path.cwd() / "images/chara"
 
         self._chara_images = {'yichen': [[], [], [], [], []]}
         for i in range(1, 12):
-            self._chara_images['yichen'][0].append(pygame.image.load("images\\chara\\yichen\\idle_{}.png".format(i)))
+            self._chara_images['yichen'][0].append(pygame.image.load(self._chara_path / "yichen/idle_{}.png".format(i)))
         for i in range(1, 7):
-            self._chara_images['yichen'][1].append(pygame.image.load("images\\chara\\yichen\\walk_{}.png".format(i)))
+            self._chara_images['yichen'][1].append(pygame.image.load(self._chara_path / "yichen/walk_{}.png".format(i)))
         for i in range(1, 9):
-            self._chara_images['yichen'][2].append(pygame.image.load("images\\chara\\yichen\\attack_{}.png".format(i)))
+            self._chara_images['yichen'][2].append(pygame.image.load(self._chara_path / "yichen/attack_{}.png".format(i)))
         for i in range(1, 13):
-            self._chara_images['yichen'][3].append(pygame.image.load("images\\chara\\yichen\\skill1_{}.png".format(i)))
+            self._chara_images['yichen'][3].append(pygame.image.load(self._chara_path / "yichen/skill1_{}.png".format(i)))
         for i in range(1, 10):
-            self._chara_images['yichen'][4].append(pygame.image.load("images\\chara\\yichen\\skill2_{}.png".format(i)))
+            self._chara_images['yichen'][4].append(pygame.image.load(self._chara_path / "yichen/skill2_{}.png".format(i)))
 
         self._chara_images['jie'] = [[], [], [], [], []]
         for i in range(1, 7):
-            self._chara_images['jie'][0].append(pygame.image.load("images\\chara\\jie\\idle_{}.png".format(i)))
+            self._chara_images['jie'][0].append(pygame.image.load(self._chara_path / "jie/idle_{}.png".format(i)))
         for i in range(1, 9):
-            self._chara_images['jie'][1].append(pygame.image.load("images\\chara\\jie\\walk_{}.png".format(i)))
+            self._chara_images['jie'][1].append(pygame.image.load(self._chara_path / "jie/walk_{}.png".format(i)))
         for i in range(1, 6):
-            self._chara_images['jie'][2].append(pygame.image.load("images\\chara\\jie\\attack_{}.png".format(i)))
+            self._chara_images['jie'][2].append(pygame.image.load(self._chara_path / "jie/attack_{}.png".format(i)))
         for i in range(1, 7):
-            self._chara_images['jie'][3].append(pygame.image.load("images\\chara\\jie\\skill1_{}.png".format(i)))
+            self._chara_images['jie'][3].append(pygame.image.load(self._chara_path / "jie/skill1_{}.png".format(i)))
         for i in range(1, 25):
-            self._chara_images['jie'][4].append(pygame.image.load("images\\chara\\jie\\skill2_{}.png".format(i)))
+            self._chara_images['jie'][4].append(pygame.image.load(self._chara_path / "jie/skill2_{}.png".format(i)))
 
         """
         角色攻击/技能偏移参数，用于调整图片显示位置
@@ -87,16 +89,21 @@ class Globles:
         """
         特效素材
         """
-
+        self._effect_path = pathlib.Path.cwd() / "images/effects"
         self._effect_images = {'fireball': [],
                                'wind': []}
         for i in range(1, 19):
-            self._effect_images['fireball'].append(pygame.image.load("images\\effects\\fireball_{}.png".format(i)))
+            self._effect_images['fireball'].append(pygame.image.load(self._effect_path / "fireball_{}.png".format(i)))
         for i in range(1, 18):
-            self._effect_images['wind'].append(pygame.image.load("images\\effects\\wind_{}.png".format(i)))
+            self._effect_images['wind'].append(pygame.image.load(self._effect_path / "wind_{}.png".format(i)))
 
         """
         精灵列表
+        子弹列表
+        
+        
+        
+        
         """
         self._all_sprites_list = pygame.sprite.LayeredUpdates()
         self._bullet_list = pygame.sprite.Group()

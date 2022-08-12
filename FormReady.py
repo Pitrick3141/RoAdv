@@ -26,13 +26,22 @@ class FormReady:
         # 初始化阶段
         Globles.init_stage()
 
+        # 英雄列表
         self.hero_list = ['yichen', 'jie']
+
+        # 英雄的显示名
         self.hero_display_name = ['Yichen W.', 'Jie Z.']
+
+        # 当前英雄序号
         self.hero_index = 0
+
+        # 当前英雄名称
         self.hero_name = 'yichen'
 
+        # 实例化英雄对象
         self.hero = PygameObject.Character('yichen', 30, 60)
 
+        # 添加英雄对象到精灵列表
         Globles.add_sprite(self.hero, 1)
 
         debug("准备页面初始化完成", type='success', who=self.__class__.__name__)
@@ -45,53 +54,66 @@ class FormReady:
         while not self.done:
             # 事件循环处理
             for event in pygame.event.get():
-                # 退出程序
+                # 退出事件
                 if event.type == pygame.QUIT:
                     debug("触发退出事件,当前时刻{}".format(pygame.time.get_ticks()), who=self.__class__.__name__)
                     self.done = True
+                # 按下键盘事件
                 if event.type == pygame.KEYDOWN:
                     key_list = pygame.key.get_pressed()
+                    # 按下H切换英雄，必须在非施法状态使用
                     if key_list[pygame.K_h] and self.hero.is_attacking == -1:
+                        # 按顺序切换英雄，若是最后一个则回到第一个英雄
                         if self.hero_index < len(self.hero_list) - 1:
                             self.hero_index += 1
                         else:
                             self.hero_index = 0
+                        # 更改当前英雄名称
                         self.hero_name = self.hero_list[self.hero_index]
+                        # 从精灵列表移除当前英雄
                         Globles.remove_sprite(self.hero)
+                        # 实例化新的英雄继承当前的朝向和位置
                         new_hero = PygameObject.Character(self.hero_name,
                                                           self.hero.rect.x,
                                                           self.hero.rect.y)
                         if self.hero.reflect:
                             new_hero.reflect = True
+                        # 用新的英雄代替当前英雄
                         self.hero = new_hero
+                        # 将新的英雄加入精灵列表
                         Globles.add_sprite(self.hero, 1)
                         debug("已将英雄切换为{}".format(self.hero_display_name[self.hero_index]), type='success',
                               who=self.__class__.__name__)
 
-            # 主页面背景
+            # 准备页面背景
             self.screen.fill(Globles.get_color('white'))
 
+            # 准备页面文本显示
+            # 操作教程
             Globles.show_text(self.screen, "Select and try your Hero!", 20, 10, bold=False, size=20, color='black')
             Globles.show_text(self.screen, "Press A and D to walk, Press J to attack", 20, 160, bold=False, size=20,
                               color='black')
+            # 当前英雄
             Globles.show_text(self.screen, "Press H to switch Hero, Current Hero: {}".format(
                 self.hero_display_name[self.hero_index]),
                               20, 190, bold=False, size=20, color='black')
+            # 速度，移速，最大生命值
             Globles.show_text(self.screen, "Speed: {} Attack Speed: {} Max HP: {}".format(self.hero.speed,
                                                                                           self.hero.attack_speed,
                                                                                           self.hero.max_hp),
                               20, 250, bold=False, size=20, color='black')
+            # 攻击力，防御力
             Globles.show_text(self.screen, "Attack: {} Defence: {}".format(self.hero.attack,
                                                                            self.hero.defence),
                               20, 280, bold=False, size=20, color='black')
-
+            # 技能1
             Globles.show_text(self.screen, "Skill 1 Press I, Cooldown: ({}/{})".format(
                 (pygame.time.get_ticks() - self.hero.skill1_cast)//100
                 if pygame.time.get_ticks() - self.hero.skill1_cast < self.hero.skills_cd[0]
                 else self.hero.skills_cd[0]//100,
                 self.hero.skills_cd[0]//100),
                               20, 310, bold=False, size=20, color='black')
-
+            # 技能2
             Globles.show_text(self.screen, "Skill 2 Press O, Cooldown: ({}/{})".format(
                 (pygame.time.get_ticks() - self.hero.skill2_cast)//100
                 if pygame.time.get_ticks() - self.hero.skill2_cast < self.hero.skills_cd[1]
@@ -99,8 +121,11 @@ class FormReady:
                 self.hero.skills_cd[1]//100),
                               20, 340, bold=False, size=20, color='black')
 
+            # 更新精灵列表
             Globles.update_sprites(self.screen)
+            # 子弹物理计算
             Globles.bulletMech()
+            # 在屏幕上绘制精灵列表
             Globles.draw_sprites(self.screen)
 
             # 更新页面
