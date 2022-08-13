@@ -342,7 +342,10 @@ def show_text(screen, content: str, x, y, **kwargs):
     # 字体 微软雅黑
     font = pygame.font.SysFont('Microsoft Yahei', size, is_bold, is_italic)
     if sys.platform != 'win32':
-        font = pygame.font.Font('Yahei.ttf', size)
+        if is_bold:
+            font = pygame.font.Font('fonts/Yahei_Bold.ttf', size)
+        else:
+            font = pygame.font.Font('fonts/Yahei.ttf', size)
 
     # 文字渲染 抗锯齿开启
     text = font.render(content, True, color_rgb)
