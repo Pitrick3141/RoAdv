@@ -1,3 +1,5 @@
+import sys
+
 import pygame
 import Globles
 from debugOutp import debug
@@ -70,6 +72,7 @@ class FormHome:
                 if event.type == pygame.QUIT:
                     debug("触发退出事件,当前时刻{}".format(pygame.time.get_ticks()), who=self.__class__.__name__)
                     self.done = True
+                    sys.exit(0)
                 # 点击鼠标
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     debug("触发鼠标点击事件,当前时刻{}".format(pygame.time.get_ticks()), who=self.__class__.__name__)

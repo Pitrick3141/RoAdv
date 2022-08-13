@@ -21,11 +21,13 @@ def debug(text: str, **kwargs):
     info_from = "未知来源"
     if kwargs.get('who') == 'main':
         info_from = "主程序"
-    if kwargs.get('who') == 'FormHome':
+    elif kwargs.get('who') == 'FormHome':
         info_from = "开始页面"
-    if kwargs.get('who') == 'FormReady':
+    elif kwargs.get('who') == 'FormReady':
         info_from = '准备页面'
-    if kwargs.get('who') == 'Globles':
+    elif kwargs.get('who') == 'FormGame':
+        info_from = '游戏页面'
+    elif kwargs.get('who') == 'Globles':
         info_from = '全局'
 
     # 错误信息

@@ -1,5 +1,6 @@
 import FormHome
 import FormReady
+import FormGame
 import Globles
 from debugOutp import debug
 
@@ -15,3 +16,7 @@ if __name__ == '__main__':
     FormReady.init()
     # 显示开始页面
     FormReady.display()
+    # 初始化游戏页面
+    FormGame.init()
+    # 显示游戏页面
+    FormGame.display()
