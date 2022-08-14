@@ -334,14 +334,13 @@ def show_text(screen, content: str, x, y, **kwargs):
     size = kwargs.get('size') if 'size' in kwargs.keys() else 25
     # 是否加粗 默认 是
     is_bold = kwargs.get('bold') if 'bold' in kwargs.keys() else True
-    # 是否斜体 默认 否
-    is_italic = kwargs.get('italic') if 'italic' in kwargs.keys() else False
     # 是否按坐标居中 默认 否
     is_middle = kwargs.get('middle') if 'middle' in kwargs.keys() else False
 
     # 字体 微软雅黑
-    font = pygame.font.SysFont('Microsoft Yahei', size, is_bold, is_italic)
-    if sys.platform != 'win32':
+    if sys.platform == 'win32':
+        font = pygame.font.SysFont('Microsoft Yahei', size, is_bold)
+    else:
         if is_bold:
             font = pygame.font.Font('fonts/Yahei_Bold.ttf', size)
         else:

@@ -14,6 +14,8 @@ debug(内容，参数)
 
 
 def debug(text: str, **kwargs):
+    # 输出调试信息 (信息, 参数)
+
     # 读取当前时间
     current_time = time.strftime("%H:%M:%S", time.localtime())
 
