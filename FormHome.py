@@ -118,12 +118,13 @@ class FormHome:
                     click_alpha += 5
                     if click_alpha > 255:
                         reverse = -1
-                elif click_alpha > 255 or click_alpha < 50:
+                elif click_alpha > 255 or click_alpha < 100:
                     reverse *= -1
                 click_alpha += 5 * reverse
             # 阶段2后 关于文本出现，闪烁并循环
             if Globles.get_stage() >= 2:
-                Globles.show_text(self.screen, about_texts[about_index], 20, 70, color='black', alpha=about_alpha, size=15, bold=False)
+                Globles.show_text(self.screen, about_texts[about_index], 20, 70,
+                                  color='black', alpha=about_alpha, size=15, bold=False)
                 if about_reverse == 0:
                     about_alpha += 3
                     if about_alpha > 255:
