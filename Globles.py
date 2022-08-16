@@ -87,8 +87,8 @@ class Globles:
         角色属性
         [速度, 攻速, 最大生命, 攻击力, 防御力, 技能冷却]
         """
-        self._chara_stat = {'yichen': [3, 130, 20, 5, 2, [3500, 8000]],
-                            'jie': [6, 100, 30, 3, 5, [4000, 10000]]}
+        self._chara_stat = {'yichen': [3, 130, 20, 5, 2, [12000, 20000]],
+                            'jie': [6, 100, 30, 3, 5, [10000, 25000]]}
 
         """
         特效素材
@@ -107,7 +107,27 @@ class Globles:
         self._background_path = pathlib.Path.cwd() / "images/background"
         self._background_images = {'bg': pygame.image.load(self._background_path / "bg.png"),
                                    'bg_2': pygame.image.load(self._background_path / "bg_2.png"),
-                                   'forest': pygame.image.load(self._background_path / "forest.gif")}
+                                   'forestleft': [
+                pygame.image.load(self._background_path / "forestleft_{}.png".format(i)) for i in range(1, 5)
+                                   ],
+                                   'forestright': [
+                pygame.image.load(self._background_path / "forestright_{}.png".format(i)) for i in range(1, 5)
+                                   ]}
+
+        """
+        状态素材
+        """
+        self._buff_path = pathlib.Path.cwd() / "images/buff"
+        self._buff_name_list = ['yichen_skill_1', 'yichen_skill_2', 'jie_skill_1', 'jie_skill_2',
+                                'yichen_skill_1_cd', 'yichen_skill_2_cd', 'jie_skill_1_cd', 'jie_skill_2_cd',
+                                'attack', 'attack_cd',
+                                'atk_up', 'mhp_up', 'def_up', 'agi_up',
+                                'atk_down', 'mhp_down', 'def_down', 'agi_down',
+                                'heal', 'poison',
+                                'unknown']
+        self._buff_images = {}
+        for buff_name in self._buff_name_list:
+            self._buff_images[buff_name] = pygame.image.load(self._buff_path / "{}.png".format(buff_name))
 
         """
         精灵列表
@@ -169,7 +189,7 @@ class Globles:
         if color in self._colors.keys():
             color_rgb = self._colors.get(color)
         else:
-            debug("请求的{}颜色不存在".format(color), type='error', who=self.__class__.__name__)
+            debug("请求的名为\"{}\"的颜色不存在".format(color), type='error', who=self.__class__.__name__)
         return color_rgb
 
     def get_screen_size(self):
@@ -182,7 +202,7 @@ class Globles:
         if chara in self._chara_images.keys():
             chara_img = self._chara_images.get(chara)
         else:
-            debug("请求的{}角色素材不存在".format(chara), type='error', who=self.__class__.__name__)
+            debug("请求的名为\"{}\"的角色素材不存在".format(chara), type='error', who=self.__class__.__name__)
         return chara_img
 
     def get_effect_image(self, eff):
@@ -191,7 +211,7 @@ class Globles:
         if eff in self._effect_images.keys():
             eff_img = self._effect_images.get(eff)
         else:
-            debug("请求的{}特效素材不存在".format(eff), type='error', who=self.__class__.__name__)
+            debug("请求的名为\"{}\"的特效素材不存在".format(eff), type='error', who=self.__class__.__name__)
         return eff_img
 
     def get_background_image(self, bg):
@@ -200,16 +220,30 @@ class Globles:
         if bg in self._background_images.keys():
             bg_img = self._background_images.get(bg)
         else:
-            debug("请求的{}背景素材不存在".format(bg), type='error', who=self.__class__.__name__)
+            debug("请求的名为\"{}\"的背景素材不存在".format(bg), type='error', who=self.__class__.__name__)
+        # 判断是否为动态背景
+        if isinstance(bg_img, list):
+            bg_img = bg_img[get_span() // 100 % len(bg_img)]
         return bg_img
+
+    def get_buff_image(self, buff_name):
+        # 获取背景素材
+        buff_img = self._buff_images['unknown']
+        if buff_name in self._buff_images.keys():
+            buff_img = self._buff_images.get(buff_name)
+        else:
+            debug("请求的名为\"{}\"的状态素材不存在".format(buff_name), type='error', who=self.__class__.__name__)
+        return buff_img
 
     def add_sprite(self, sprite, layer):
         # 添加精灵到精灵列表
         self._all_sprites_list.add(sprite, layer=layer)
+        debug("成功在第{}层添加精灵{}({})".format(layer, sprite.name, sprite.type), type='success', who=self.__class__.__name__)
 
     def remove_sprite(self, sprite):
         # 从精灵列表移除精灵
         self._all_sprites_list.remove(sprite)
+        debug("成功移除精灵{}({})".format(sprite.name, sprite.type), type='success', who=self.__class__.__name__)
 
     def update_sprites(self, screen):
         # 更新精灵列表
@@ -221,11 +255,13 @@ class Globles:
 
     def add_bullet(self, sprite, layer):
         # 添加子弹到子弹列表
+        debug("成功添加子弹/特效: {}".format(sprite.name), type='success', who=self.__class__.__name__)
         self._bullet_list.add(sprite)
         self._all_sprites_list.add(sprite, layer=layer)
 
     def remove_bullet(self, sprite):
         # 从子弹列表移除子弹
+        debug("成功移除子弹/特效: {}".format(sprite.name), type='success', who=self.__class__.__name__)
         self._bullet_list.remove(sprite)
         self._all_sprites_list.remove(sprite)
 
@@ -235,11 +271,13 @@ class Globles:
 
     def add_monster(self, sprite):
         # 添加敌人到敌人列表
+        debug("成功添加敌人: {}".format(sprite.name), type='success', who=self.__class__.__name__)
         self._monster_list.add(sprite)
         self._all_sprites_list.add(sprite, layer=2)
 
     def remove_monster(self, sprite):
         # 从敌人列表移除敌人
+        debug("成功移除敌人: {}".format(sprite.name), type='success', who=self.__class__.__name__)
         self._monster_list.remove(sprite)
         self._all_sprites_list.remove(sprite)
 
@@ -312,7 +350,26 @@ class Globles:
     def set_protagonist(self, prot):
         # 设置故事的主角
         self._protagonist = prot
-        debug("已将故事主角设置为{}({})".format(self._chara_names['en'][prot], self._chara_names['en'][prot]),
+        debug("已将故事主角设置为{}({})".format(self._chara_names['zh'][prot], self._chara_names['en'][prot]),
+              type='success', who=self.__class__.__name__)
+
+    def get_protagonist(self):
+        # 返回故事的主角
+        return self._protagonist
+
+    def add_buff(self, sprite, buff_name, last_time, coefficient):
+        # 为精灵添加Buff
+        # 检测精灵对象是否可以添加Buff
+        if sprite.type not in ['character', 'monster']:
+            debug("为对象{}添加Buff失败: 种类为{}的对象不可添加Buff".format(sprite.name, sprite.type),
+                  type='error', who=self.__class__.__name__)
+            return
+        if buff_name not in self._buff_name_list:
+            debug("为对象{}添加Buff失败: 名称为{}的Buff不存在".format(sprite.name, buff_name),
+                  type='error', who=self.__class__.__name__)
+            return
+        sprite.buff_list[buff_name] = (pygame.time.get_ticks() + last_time * 1000, coefficient)
+        debug("成功为对象{}添加名称为{}的Buff, 持续时间{}s, 倍率系数{}".format(sprite.name, buff_name, last_time, coefficient),
               type='success', who=self.__class__.__name__)
 
 
@@ -445,3 +502,15 @@ def get_chara_name(role, lang='en'):
 
 def set_protagonist(prog):
     globles.set_protagonist(prog)
+
+
+def get_buff_image(buff_name):
+    return globles.get_buff_image(buff_name)
+
+
+def get_protagonist():
+    return globles.get_protagonist()
+
+
+def add_buff(sprite, buff_name, last_time, coefficient=1):
+    globles.add_buff(sprite, buff_name, last_time, coefficient)

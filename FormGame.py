@@ -3,6 +3,7 @@ import sys
 
 import pygame
 import Globles
+import PygameObject
 from debugOutp import debug
 
 global form_game
@@ -31,6 +32,7 @@ class FormGame:
         debug("游戏页面初始化完成", type='success', who=self.__class__.__name__)
 
     def display_screen(self):
+
         debug("进入游戏页面循环体", who=self.__class__.__name__)
         Globles.next_stage()
 
@@ -38,9 +40,15 @@ class FormGame:
         about_texts_en = ["A Long, Long Time ago",
                           "There was a small town called {}".format(Globles.get_chara_name('place')),
                           "People all lived happily in the town",
-                          "However",
+                          "However,",
                           "one day the evil {} came to the town".format(Globles.get_chara_name('anta')),
                           "He Spread his terrible curse all over the town",
+                          "All people cursed became weak and pale,",
+                          "which includes {} and {}".format(Globles.get_chara_name('couple'),
+                                                            Globles.get_chara_name('friend_cp')),
+                          "What's even worse,",
+                          "The animals around the town are affected",
+                          "and transferred into terrible monsters",
                           "The guardian of the town, {}".format(Globles.get_chara_name('prot')),
                           "and the best teammate, {}".format(Globles.get_chara_name('friend')),
                           "set off to save {}".format(Globles.get_chara_name('place')),
@@ -51,9 +59,16 @@ class FormGame:
         about_texts_zh = ["很久，很久以前",
                           "有一座叫做{}的小镇".format(Globles.get_chara_name('place', 'zh')),
                           "小镇的居民全都安居乐业",
-                          "然而",
+                          "然而，",
                           "一天邪恶的{}来到了镇上".format(Globles.get_chara_name('anta', 'zh')),
                           "他向整个小镇散播了他可怕的诅咒",
+                          "中了诅咒的人变得虚弱无力，",
+                          "这其中就包括了{}和{}".format(
+                              Globles.get_chara_name('couple', 'zh'),
+                              Globles.get_chara_name('friend_cp', 'zh')),
+                          "更糟糕的是,",
+                          "小镇附近的动物都被邪恶力量控制",
+                          "变成了可怕的魔物",
                           "小镇的守护者{}".format(Globles.get_chara_name('prot', 'zh')),
                           "和最棒的队友{}".format(Globles.get_chara_name('friend', 'zh')),
                           "踏上了拯救{}的旅程".format(Globles.get_chara_name('place', 'zh')),
@@ -69,6 +84,20 @@ class FormGame:
         about_alpha = 0
         about_speed = 2
 
+        # 当前的背景序号
+        bg_index = 0
+        # 背景列表
+        bg_list = ['bg', 'bg_2', 'forestleft', 'forestright']
+
+        # 英雄列表
+        hero_list = ['none', 'yichen', 'shenran', 'jie', 'yinuo']
+
+        # 实例化英雄对象
+        hero = PygameObject.Character(hero_list[Globles.get_protagonist()], 30, 180)
+
+        # 添加英雄对象到精灵列表
+        Globles.add_sprite(hero, 1)
+
         while not self.done:
             # 事件循环处理
             for event in pygame.event.get():
@@ -82,7 +111,10 @@ class FormGame:
                     # 按下Q跳过剧情
                     if key_list[pygame.K_q] and Globles.get_stage() == 0:
                         Globles.next_stage()
+                        about_reverse = 0
+                        about_alpha = 0
                         debug("已跳过剧情", type='info', who=self.__class__.__name__)
+                        bg_index = 2
                     if key_list[pygame.K_LCTRL] or key_list[pygame.K_RCTRL]:
                         if about_speed == 2:
                             about_speed = 4
@@ -94,10 +126,7 @@ class FormGame:
                             about_speed = 2
                             debug("剧情播放速度1x", type='info', who=self.__class__.__name__)
 
-            if Globles.get_stage() == 0 and about_index < 5:
-                bg = Globles.get_background_image('bg')
-            else:
-                bg = Globles.get_background_image('bg_2')
+            bg = Globles.get_background_image(bg_list[bg_index])
             bg = pygame.transform.scale(bg, Globles.get_screen_size())
             self.screen.blit(bg, (0, 0))
 
@@ -106,7 +135,7 @@ class FormGame:
                     text_color = 'red'
                     text_shake_x = 0
                     text_shake_y = 0
-                elif about_index == 5:
+                elif about_index == 5 or about_index == 10:
                     text_color = 'red'
                     text_shake_x = random.randint(-5, 5)
                     text_shake_y = random.randint(-3, 3)
@@ -134,9 +163,14 @@ class FormGame:
                     about_alpha = 0
                     if about_index < len(about_texts_en) - 1:
                         about_index += 1
+                        if bg_index == 0 and about_index == 5:
+                            bg_index = 1
                     else:
                         # 完成一次循环
                         Globles.next_stage()
+                        about_reverse = 0
+                        about_alpha = 0
+                        bg_index = 2
                 about_alpha += about_speed * about_reverse
                 Globles.show_text(self.screen, "按Q跳过剧情, 按Ctrl加速剧情", 20, 450,
                                   color='black', alpha=about_alpha, size=15, bold=False)
@@ -148,6 +182,49 @@ class FormGame:
                 elif about_speed == 8:
                     Globles.show_text(self.screen, "4X>>>>", 550, 20,
                                       color='red', alpha=about_alpha, size=25)
+            elif Globles.get_stage() == 1:
+                Globles.show_text(self.screen,
+                                  "Prologue",
+                                  Globles.get_screen_size()[0] / 2, 200,
+                                  color='black', alpha=about_alpha, size=50, middle=True)
+                Globles.show_text(self.screen,
+                                  "序章",
+                                  Globles.get_screen_size()[0] / 2, 140,
+                                  color='black', alpha=about_alpha, size=50, middle=True)
+                if about_reverse == 0:
+                    about_alpha += 3
+                    if about_alpha > 500:
+                        about_reverse = -1
+                if about_alpha > 0 and about_reverse == -1:
+                    about_alpha -= 3
+                if hero.rect.x + 50 > Globles.get_screen_size()[0] and bg_index == 2:
+                    bg_index = 3
+                    hero.rect.x = 80
+                if hero.rect.x < 60 and bg_index == 3:
+                    bg_index = 2
+                    hero.rect.x = Globles.get_screen_size()[0] - 70
+                if hero.rect.x > 300 and bg_index == 3:
+                    Globles.next_stage()
+                    about_reverse = 0
+                    about_alpha = 0
+            if Globles.get_stage() == 2:
+                Globles.show_text(self.screen,
+                                  "To be Continued",
+                                  Globles.get_screen_size()[0] / 2, 200,
+                                  color='black', alpha=about_alpha, size=50, middle=True)
+                Globles.show_text(self.screen,
+                                  "未完待续",
+                                  Globles.get_screen_size()[0] / 2, 140,
+                                  color='black', alpha=about_alpha, size=50, middle=True)
+                if about_reverse == 0:
+                    about_alpha += 3
+                    if about_alpha > 500:
+                        about_reverse = -1
+                if about_alpha > 0 and about_reverse == -1:
+                    about_alpha -= 3
+            if Globles.get_stage() >= 1:
+                Globles.update_sprites(self.screen)
+                Globles.draw_sprites(self.screen)
 
             # 更新页面
             pygame.display.flip()

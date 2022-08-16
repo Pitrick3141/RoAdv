@@ -43,6 +43,8 @@ class FormReady:
         # 实例化英雄对象
         self.hero = PygameObject.Character('yichen', 30, 60)
 
+        self.hero.skills_cd = [0, 0]
+
         # 添加英雄对象到精灵列表
         Globles.add_sprite(self.hero, 1)
 
@@ -53,7 +55,7 @@ class FormReady:
         debug("进入准备页面循环体", who=self.__class__.__name__)
 
         # 按钮尺寸
-        button_dimension = [Globles.get_screen_size()[0]/2, 400, 450, 30]
+        button_dimension = [Globles.get_screen_size()[0] / 2, 400, 450, 30]
 
         # 主循环体
         while not self.done:
@@ -90,6 +92,8 @@ class FormReady:
                             new_hero.reflect = True
                         # 用新的英雄代替当前英雄
                         self.hero = new_hero
+                        # 清除冷却时间
+                        self.hero.skills_cd = [0, 0]
                         # 将新的英雄加入精灵列表
                         Globles.add_sprite(self.hero, 1)
                         debug("已将英雄切换为{}".format(self.hero_display_name[self.hero_index]), type='success',
@@ -98,8 +102,10 @@ class FormReady:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     debug("触发鼠标点击事件,当前时刻{}".format(pygame.time.get_ticks()),
                           who=self.__class__.__name__)
-                    if button_dimension[0] - button_dimension[2] / 2 < mouse[0] < button_dimension[0] + button_dimension[2] / 2 \
-                            and button_dimension[1] - button_dimension[3] / 2 < mouse[1] < button_dimension[1] + button_dimension[3] / 2:
+                    if button_dimension[0] - button_dimension[2] / 2 < mouse[0] < button_dimension[0] + \
+                            button_dimension[2] / 2 \
+                            and button_dimension[1] - button_dimension[3] / 2 < mouse[1] < button_dimension[1] + \
+                            button_dimension[3] / 2:
                         debug("鼠标点击继续按钮区域,当前时刻{}".format(pygame.time.get_ticks()),
                               who=self.__class__.__name__)
                         if self.hero_index == 0:
@@ -114,44 +120,33 @@ class FormReady:
             # 准备页面文本显示
             # 操作教程
             Globles.show_text(self.screen, "Select and try your Hero!", 20, 10, bold=False, size=20, color='black')
-            Globles.show_text(self.screen, "Press A and D to walk, Press J to attack", 20, 160, bold=False, size=20,
-                              color='black')
+            Globles.show_text(self.screen, "Press A and D to walk, "
+                                           "Press J to attack, "
+                                           "Press I and O to use skills", 20, 160, bold=False, size=20, color='black')
             # 当前英雄
             Globles.show_text(self.screen, "Press H to switch Hero, Current Hero: {}".format(
                 self.hero_display_name[self.hero_index]),
                               20, 190, bold=False, size=20, color='black')
             # 速度，移速，最大生命值
-            Globles.show_text(self.screen, "Speed: {} Attack Speed: {} Max HP: {}".format(self.hero.speed,
-                                                                                          self.hero.attack_speed,
-                                                                                          self.hero.max_hp),
+            Globles.show_text(self.screen, "Speed: {:.1f} Attack Speed: {:.2f} Max HP: {:.1f}".format(self.hero.speed,
+                                                                                                      200 / self.hero.attack_speed,
+                                                                                                      self.hero.max_hp),
                               20, 250, bold=False, size=20, color='black')
             # 攻击力，防御力
-            Globles.show_text(self.screen, "Attack: {} Defence: {}".format(self.hero.attack,
-                                                                           self.hero.defence),
+            Globles.show_text(self.screen, "Attack: {:.1f} Defence: {:.1f}".format(self.hero.attack,
+                                                                                   self.hero.defence),
                               20, 280, bold=False, size=20, color='black')
-            # 技能1
-            Globles.show_text(self.screen, "Skill 1 Press I, Cooldown: ({}/{})".format(
-                (pygame.time.get_ticks() - self.hero.skill1_cast) // 100
-                if pygame.time.get_ticks() - self.hero.skill1_cast < self.hero.skills_cd[0]
-                else self.hero.skills_cd[0] // 100,
-                self.hero.skills_cd[0] // 100),
-                              20, 310, bold=False, size=20, color='black')
-            # 技能2
-            Globles.show_text(self.screen, "Skill 2 Press O, Cooldown: ({}/{})".format(
-                (pygame.time.get_ticks() - self.hero.skill2_cast) // 100
-                if pygame.time.get_ticks() - self.hero.skill2_cast < self.hero.skills_cd[1]
-                else self.hero.skills_cd[1] // 100,
-                self.hero.skills_cd[1] // 100),
-                              20, 340, bold=False, size=20, color='black')
 
             # 继续按钮
             if button_dimension[0] - button_dimension[2] / 2 < mouse[0] < button_dimension[0] + button_dimension[2] / 2 \
                     and button_dimension[1] - button_dimension[3] / 2 < mouse[1] < button_dimension[1] + \
                     button_dimension[3] / 2:
-                Globles.show_text(self.screen, "Click to Continue with {}".format(self.hero_display_name[self.hero_index]),
+                Globles.show_text(self.screen,
+                                  "Click to Continue with {}".format(self.hero_display_name[self.hero_index]),
                                   button_dimension[0], button_dimension[1], size=30, color='title_red', middle=True)
             else:
-                Globles.show_text(self.screen, "Click to Continue with {}".format(self.hero_display_name[self.hero_index]),
+                Globles.show_text(self.screen,
+                                  "Click to Continue with {}".format(self.hero_display_name[self.hero_index]),
                                   button_dimension[0], button_dimension[1], size=30, middle=True)
 
             # 更新精灵列表
@@ -168,8 +163,9 @@ class FormReady:
             self.clock.tick(60)
 
         # 关闭页面
-        debug("准备页面播放完成", type='success', who=self.__class__.__name__)
+        Globles.remove_sprite(self.hero)
         pygame.quit()
+        debug("准备页面播放完成", type='success', who=self.__class__.__name__)
 
 
 def init():
