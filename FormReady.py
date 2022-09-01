@@ -57,6 +57,8 @@ class FormReady:
         # 按钮尺寸
         button_dimension = [Globles.get_screen_size()[0] / 2, 400, 450, 30]
 
+        PygameObject.spawn_enemy('stump', 300, 70)
+
         # 主循环体
         while not self.done:
 
@@ -98,6 +100,10 @@ class FormReady:
                         Globles.add_sprite(self.hero, 1)
                         debug("已将英雄切换为{}".format(self.hero_display_name[self.hero_index]), type='success',
                               who=self.__class__.__name__)
+                    elif key_list[pygame.K_t]:
+                        PygameObject.spawn_enemy('stump', self.hero.rect.x, 70)
+                        debug("已生成新的木桩".format(self.hero_display_name[self.hero_index]), type='success',
+                              who=self.__class__.__name__)
                 # 点击鼠标
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     debug("触发鼠标点击事件,当前时刻{}".format(pygame.time.get_ticks()),
@@ -120,6 +126,7 @@ class FormReady:
             # 准备页面文本显示
             # 操作教程
             Globles.show_text(self.screen, "Select and try your Hero!", 20, 10, bold=False, size=20, color='black')
+            Globles.show_text(self.screen, "HIT ME!", 290, 40, size=20, color='black')
             Globles.show_text(self.screen, "Press A and D to walk, "
                                            "Press J to attack, "
                                            "Press I and O to use skills", 20, 160, bold=False, size=20, color='black')
@@ -152,9 +159,11 @@ class FormReady:
             # 更新精灵列表
             Globles.update_sprites(self.screen)
             # 子弹物理计算
-            Globles.bulletMech()
+            PygameObject.bulletMech()
             # 在屏幕上绘制精灵列表
             Globles.draw_sprites(self.screen)
+            # 更新文本
+            Globles.update_texts(self.screen)
 
             # 更新页面
             pygame.display.flip()
@@ -164,6 +173,9 @@ class FormReady:
 
         # 关闭页面
         Globles.remove_sprite(self.hero)
+        for enemy in Globles.get_monster_list():
+            Globles.remove_monster(enemy)
+        Globles.next_wave()
         pygame.quit()
         debug("准备页面播放完成", type='success', who=self.__class__.__name__)
 

@@ -6,6 +6,8 @@ from debugOutp import debug
 
 global globles
 
+is_debug = False
+
 
 class Globles:
 
@@ -24,7 +26,9 @@ class Globles:
                         'green': (0, 255, 0),
                         'red': (255, 0, 0),
                         'title_blue': (198, 219, 218),
-                        'title_red': (254, 225, 232)}
+                        'title_red': (254, 225, 232),
+                        'orange': (255, 128, 0),
+                        'purple': (128, 0, 255)}
 
         """
         屏幕大小
@@ -85,21 +89,81 @@ class Globles:
 
         """
         角色属性
-        [速度, 攻速, 最大生命, 攻击力, 防御力, 技能冷却]
+        [速度, 攻速, 最大生命, 攻击力, 防御力, 技能冷却, 攻击距离, 技能倍率]
         """
-        self._chara_stat = {'yichen': [3, 130, 20, 5, 2, [12000, 20000]],
-                            'jie': [6, 100, 30, 3, 5, [10000, 25000]]}
+        self._chara_stat = {'yichen': [3, 130, 20, 5, 2, [12000, 20000], [100, 70, 90], [1, 1, 3]],
+                            'jie': [6, 100, 30, 2, 5, [10000, 25000], [25, 0, 0], [1, 3, 7.5]]}
+
+        """
+        敌人属性
+        [速度, 最大生命, 攻击力, 防御力]
+        """
+        self._enemy_stat = {'bat': [2, 5, 1, 1],
+                            'scorpion': [1, 10, 2, 2],
+                            'stump': [0, 200, 0, 0]}
+
+        """
+        敌人素材
+        """
+
+        self._enemy_path = pathlib.Path.cwd() / "images/enemy"
+        self._enemy_images = {'butterfly': [[]]}
+        for i in range(1, 4):
+            self._enemy_images['butterfly'][0].append(
+                pygame.image.load(self._enemy_path / "butterfly_{}.png".format(i)))
+
+        self._enemy_images['cat'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['cat'][0].append(pygame.image.load(self._enemy_path / "cat_{}.png".format(i)))
+
+        self._enemy_images['chicken'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['chicken'][0].append(pygame.image.load(self._enemy_path / "chicken_{}.png".format(i)))
+
+        self._enemy_images['cow'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['cow'][0].append(pygame.image.load(self._enemy_path / "cow_{}.png".format(i)))
+
+        self._enemy_images['dog'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['dog'][0].append(pygame.image.load(self._enemy_path / "dog_{}.png".format(i)))
+
+        self._enemy_images['horse'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['horse'][0].append(pygame.image.load(self._enemy_path / "horse_{}.png".format(i)))
+
+        self._enemy_images['sheep'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['sheep'][0].append(pygame.image.load(self._enemy_path / "sheep_{}.png".format(i)))
+
+        self._enemy_images['bat'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['bat'][0].append(pygame.image.load(self._enemy_path / "bat_{}.png".format(i)))
+
+        self._enemy_images['scorpion'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['scorpion'][0].append(pygame.image.load(self._enemy_path / "scorpion_{}.png".format(i)))
+
+        self._enemy_images['stump'] = [[]]
+        for i in range(1, 10):
+            self._enemy_images['stump'][0].append(pygame.image.load(self._enemy_path / "stump_{}.png".format(i)))
 
         """
         特效素材
         """
         self._effect_path = pathlib.Path.cwd() / "images/effects"
         self._effect_images = {'fireball': [],
-                               'wind': []}
+                               'wind': [],
+                               'purify': [],
+                               'explosion': []}
         for i in range(1, 19):
             self._effect_images['fireball'].append(pygame.image.load(self._effect_path / "fireball_{}.png".format(i)))
         for i in range(1, 18):
             self._effect_images['wind'].append(pygame.image.load(self._effect_path / "wind_{}.png".format(i)))
+        for i in range(1, 4):
+            self._effect_images['purify'].append(pygame.image.load(self._effect_path / "purify_{}.png".format(i)))
+        for i in range(1, 11):
+            self._effect_images['explosion'].append(pygame.image.load(self._effect_path / "explosion_{}.png".format(i)))
 
         """
         背景素材
@@ -108,10 +172,12 @@ class Globles:
         self._background_images = {'bg': pygame.image.load(self._background_path / "bg.png"),
                                    'bg_2': pygame.image.load(self._background_path / "bg_2.png"),
                                    'forestleft': [
-                pygame.image.load(self._background_path / "forestleft_{}.png".format(i)) for i in range(1, 5)
+                                       pygame.image.load(self._background_path / "forestleft_{}.png".format(i)) for i in
+                                       range(1, 5)
                                    ],
                                    'forestright': [
-                pygame.image.load(self._background_path / "forestright_{}.png".format(i)) for i in range(1, 5)
+                                       pygame.image.load(self._background_path / "forestright_{}.png".format(i)) for i
+                                       in range(1, 5)
                                    ]}
 
         """
@@ -124,6 +190,7 @@ class Globles:
                                 'atk_up', 'mhp_up', 'def_up', 'agi_up',
                                 'atk_down', 'mhp_down', 'def_down', 'agi_down',
                                 'heal', 'poison',
+                                'yin', 'yang',
                                 'unknown']
         self._buff_images = {}
         for buff_name in self._buff_name_list:
@@ -161,6 +228,20 @@ class Globles:
                                     "MacKenway"]}
 
         self._protagonist = 1
+
+        """
+        战斗阶段
+        _is_battle 战斗状态 0:未开始 1:进行中 2:已结束
+        """
+        self._is_battle = 0
+        self._remain_enemies = 0
+        self._current_wave = 0
+
+        """
+        可移动区域
+        """
+        self._movable_l = 0
+        self._movable_r = 700
 
     def next_stage(self):
         # 进入下一个阶段
@@ -205,6 +286,15 @@ class Globles:
             debug("请求的名为\"{}\"的角色素材不存在".format(chara), type='error', who=self.__class__.__name__)
         return chara_img
 
+    def get_enemy_image(self, enemy_name):
+        # 获取敌人素材
+        enemy_img = None
+        if enemy_name in self._enemy_images.keys():
+            enemy_img = self._enemy_images.get(enemy_name)
+        else:
+            debug("请求的名为\"{}\"的敌人素材不存在".format(enemy_name), type='error', who=self.__class__.__name__)
+        return enemy_img
+
     def get_effect_image(self, eff):
         # 获取特效素材
         eff_img = None
@@ -238,7 +328,8 @@ class Globles:
     def add_sprite(self, sprite, layer):
         # 添加精灵到精灵列表
         self._all_sprites_list.add(sprite, layer=layer)
-        debug("成功在第{}层添加精灵{}({})".format(layer, sprite.name, sprite.type), type='success', who=self.__class__.__name__)
+        debug("成功在第{}层添加精灵{}({})".format(layer, sprite.name, sprite.type), type='success',
+              who=self.__class__.__name__)
 
     def remove_sprite(self, sprite):
         # 从精灵列表移除精灵
@@ -274,12 +365,18 @@ class Globles:
         debug("成功添加敌人: {}".format(sprite.name), type='success', who=self.__class__.__name__)
         self._monster_list.add(sprite)
         self._all_sprites_list.add(sprite, layer=2)
+        self._remain_enemies += 1
+        if not self._is_battle:
+            self.start_battle()
 
     def remove_monster(self, sprite):
         # 从敌人列表移除敌人
         debug("成功移除敌人: {}".format(sprite.name), type='success', who=self.__class__.__name__)
         self._monster_list.remove(sprite)
         self._all_sprites_list.remove(sprite)
+        self._remain_enemies -= 1
+        if self._remain_enemies == 0:
+            self.end_battle()
 
     def get_monster_list(self):
         # 返回敌人列表
@@ -293,19 +390,13 @@ class Globles:
         return att_adj
 
     def get_chara_stat(self, hero_name, stat_index):
-        return self._chara_stat[hero_name][stat_index]
-
-    def bulletMech(self):
-        enemy_hit_list = []
-        (screen_w, screen_h) = self._screen_size
-        for bullet in self._bullet_list:
-            enemy_hit_list = pygame.sprite.spritecollide(bullet, self._monster_list, False)
-            # Remove the bullet if it flies up off the screen
-            if not 0 < bullet.rect.x < screen_w or not 0 < bullet.rect.y < screen_h and bullet.self_destroy:
-                self.remove_bullet(bullet)
-            for enemy in enemy_hit_list:
-                # enemy.hp -= bullet.damage
-                self.remove_bullet(bullet)
+        # 获取角色属性
+        if hero_name in self._chara_stat.keys():
+            chara_stat = self._chara_stat.get(hero_name)
+        else:
+            debug("请求的名为\"{}\"的角色属性不存在".format(hero_name), type='error', who=self.__class__.__name__)
+            return None
+        return chara_stat[stat_index]
 
     def get_chara_name(self, role, lang):
         if role == "prot":
@@ -360,7 +451,7 @@ class Globles:
     def add_buff(self, sprite, buff_name, last_time, coefficient):
         # 为精灵添加Buff
         # 检测精灵对象是否可以添加Buff
-        if sprite.type not in ['character', 'monster']:
+        if sprite.type not in ['character', 'enemy']:
             debug("为对象{}添加Buff失败: 种类为{}的对象不可添加Buff".format(sprite.name, sprite.type),
                   type='error', who=self.__class__.__name__)
             return
@@ -368,9 +459,135 @@ class Globles:
             debug("为对象{}添加Buff失败: 名称为{}的Buff不存在".format(sprite.name, buff_name),
                   type='error', who=self.__class__.__name__)
             return
-        sprite.buff_list[buff_name] = (pygame.time.get_ticks() + last_time * 1000, coefficient)
-        debug("成功为对象{}添加名称为{}的Buff, 持续时间{}s, 倍率系数{}".format(sprite.name, buff_name, last_time, coefficient),
-              type='success', who=self.__class__.__name__)
+        if last_time == -1:
+            sprite.buff_list[buff_name] = (True, coefficient)
+            last_time = "∞"
+        else:
+            sprite.buff_list[buff_name] = (pygame.time.get_ticks() + last_time * 1000, coefficient)
+        debug("成功为对象{}添加名称为{}的Buff, 持续时间{}s, 倍率系数{}".format(
+            sprite.name,
+            buff_name,
+            last_time,
+            coefficient),
+            type='success', who=self.__class__.__name__)
+
+    def get_enemy_stat(self, enemy_name, stat_index):
+        # 获取敌人属性
+        if enemy_name in self._enemy_stat.keys():
+            enemy_stat = self._enemy_stat.get(enemy_name)
+        else:
+            debug("请求的名为\"{}\"的敌人属性不存在".format(enemy_name), type='error', who=self.__class__.__name__)
+            return None
+        return enemy_stat[stat_index]
+
+    def get_battle_state(self):
+        # 获取当前战斗状态
+        return self._is_battle
+
+    def start_battle(self):
+        # 开始一场战斗
+        if self._is_battle == 0:
+            self._is_battle = 1
+            debug("已开始一场战斗!当前波次{}".format(self._current_wave), type='success', who=self.__class__.__name__)
+        elif self._is_battle == 2:
+            self._is_battle = 1
+            debug("已重新开始一场战斗!当前波次{}".format(self._current_wave), type='success',
+                  who=self.__class__.__name__)
+        else:
+            debug("战斗阶段正在进行中!当前波次{}".format(self._current_wave), type='error', who=self.__class__.__name__)
+
+    def get_remain_enemies(self):
+        # 获取剩余敌人数量
+        return self._remain_enemies
+
+    def get_current_wave(self):
+        # 获取当前波次
+        return self._current_wave
+
+    def end_battle(self):
+        # 结束当前战斗
+        self._is_battle = 2
+        debug("已结束当前战斗, 当前波次{}".format(self._current_wave), type='info', who=self.__class__.__name__)
+
+    def next_wave(self):
+        # 下一波次
+        self._is_battle = 0
+        self._current_wave += 1
+        debug("已进入波次{}".format(self._current_wave), type='info', who=self.__class__.__name__)
+
+    def set_movable_area(self, left, right):
+        self._movable_l = left
+        self._movable_r = right
+        debug("已将可移动区域设置为({}, {})".format(left, right), type='info', who=self.__class__.__name__)
+
+    def get_movable_area(self):
+        return self._movable_l, self._movable_r
+
+
+# 标题池和悬浮文字池
+title_pool = []
+titles = []
+float_texts = []
+
+
+class TitleText:
+    # 展示闪烁标题
+    def __init__(self, text_zh, text_en, color):
+        self.text_zh = text_zh
+        self.text_en = text_en
+        self.color = color
+        self.alpha = 0
+        self.reverse = False
+        title_pool.append(text_zh)
+        titles.append(self)
+        debug("显示标题文字:{}({})".format(text_zh, text_en), type='success', who='Globles')
+
+    def update(self, screen) -> None:
+        show_text(screen,
+                  self.text_zh,
+                  get_screen_size()[0] / 2, 140,
+                  color=self.color,
+                  alpha=self.alpha, size=50, middle=True)
+        show_text(screen,
+                  self.text_en,
+                  get_screen_size()[0] / 2, 200,
+                  color=self.color,
+                  alpha=self.alpha, size=50, middle=True)
+        if not self.reverse:
+            self.alpha += 3
+            if self.alpha > 500:
+                self.reverse = True
+        if self.reverse:
+            self.alpha -= 3
+        if self.alpha < 0:
+            titles.remove(self)
+            del self
+
+
+class FloatText:
+    # 展示悬浮文字
+    def __init__(self, text, color, x, y, alpha=255):
+        self.text = text
+        self.color = color
+        self.x = x
+        self.y = y
+        self.alpha = alpha
+        self.reverse = False
+        float_texts.append(self)
+        debug("在({}, {})显示悬浮文字:{}".format(x, y, text), type='success', who='Globles')
+
+    def update(self, screen):
+        if not self.reverse:
+            self.alpha += 3
+            if self.alpha >= 255:
+                self.reverse = True
+        if self.reverse:
+            show_text(screen, self.text, self.x, self.y, color=self.color, size=20, middle=True, alpha=self.alpha)
+            self.alpha -= 3
+            self.y -= 1
+        if self.alpha < 0:
+            float_texts.remove(self)
+            del self
 
 
 def init():
@@ -484,10 +701,6 @@ def get_monster_list():
     return globles.get_monster_list()
 
 
-def bulletMech():
-    globles.bulletMech()
-
-
 def get_effect_image(eff):
     return globles.get_effect_image(eff)
 
@@ -514,3 +727,53 @@ def get_protagonist():
 
 def add_buff(sprite, buff_name, last_time, coefficient=1):
     globles.add_buff(sprite, buff_name, last_time, coefficient)
+
+
+def get_enemy_stat(enemy_name, stat_index):
+    if stat_index != 0:
+        stat_index -= 1
+    return globles.get_enemy_stat(enemy_name, stat_index)
+
+
+def get_enemy_image(enemy_name):
+    return globles.get_enemy_image(enemy_name)
+
+
+def add_monster(monster):
+    globles.add_monster(monster)
+
+
+def remove_monster(monster):
+    globles.remove_monster(monster)
+
+
+def get_battle_state():
+    return globles.get_battle_state()
+
+
+def get_remain_enemies():
+    return globles.get_remain_enemies()
+
+
+def get_current_wave():
+    return globles.get_current_wave()
+
+
+def next_wave():
+    globles.next_wave()
+
+
+def update_texts(screen):
+    # 更新标题文本和悬浮文本
+    if len(titles) > 0:
+        titles[0].update(screen)
+    for float_text in float_texts:
+        float_text.update(screen)
+
+
+def set_movable_area(left, right):
+    globles.set_movable_area(left, right)
+
+
+def get_movable_area():
+    return globles.get_movable_area()

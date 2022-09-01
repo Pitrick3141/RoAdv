@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import Globles
 
@@ -26,13 +28,13 @@ class PygameObject(pygame.sprite.Sprite):
         self.rect.y = y
 
     def move_left(self):
-        if CheckMove(self.rect.x, self.rect.y, -self.speed, 0):
+        if CheckMove(self.rect.x, -self.speed):
             self.rect.x -= self.speed
         self.gesture = 1
         self.reflect = True
 
     def move_right(self):
-        if CheckMove(self.rect.x + self.rect.width, self.rect.y, self.speed, 0):
+        if CheckMove(self.rect.x + self.rect.width, self.speed):
             self.rect.x += self.speed
         self.gesture = 1
         self.reflect = False
@@ -66,6 +68,7 @@ class Character(PygameObject):
         self.skill2_cast = -100000
         self.bullet_launched = False
         self.buff_list = {}
+        self.attacked_list = []
 
     def update(self, screen):
 
@@ -83,6 +86,8 @@ class Character(PygameObject):
                 self.rect.x = self.attack_x
                 self.rect.y = self.attack_y
                 self.image = self.imageset[0][0]
+                # 清空伤害对象列表
+                self.attacked_list.clear()
             # 攻击/施法
             else:
                 image_index = (pygame.time.get_ticks() - self.last_move) // self.attack_speed % len(
@@ -92,14 +97,41 @@ class Character(PygameObject):
                 (att_adj_x, att_adj_y) = Globles.get_attack_adjustment(self.name, self.is_attacking, self.reflect)
                 self.rect.x = self.attack_x + att_adj_x
                 self.rect.y = self.attack_y + att_adj_y
+                attack_distance = Globles.get_chara_stat(self.name, 6)[self.is_attacking]
+                attack_coefficient = Globles.get_chara_stat(self.name, 7)[self.is_attacking]
                 # 判断朝向
                 if self.reflect:
                     self.image = pygame.transform.flip(self.image, True, False)
+                # 选取攻击对象
+                if self.reflect:
+                    attack_range_l = self.attack_x - attack_distance
+                    attack_range_r = self.attack_x + self.rect.width
+                else:
+                    attack_range_l = self.attack_x
+                    attack_range_r = self.attack_x + self.rect.width + attack_distance
+                if Globles.is_debug:
+                    pygame.draw.rect(screen, (255, 0, 0),
+                                     (attack_range_l, self.attack_y, attack_range_r - attack_range_l, self.rect.height),
+                                     1)
+                for enemy in Globles.get_monster_list():
+                    if self.name == 'jie' and self.is_attacking != 0:
+                        break
+                    if self.name == 'yichen' and self.is_attacking == 1:
+                        break
+                    if attack_range_l < enemy.rect.x < attack_range_r or attack_range_l < enemy.rect.x + enemy.rect.width < attack_range_r:
+                        if Globles.is_debug:
+                            pygame.draw.rect(screen, (0, 255, 0),
+                                             (enemy.rect.x, enemy.rect.y, enemy.rect.width, enemy.rect.height), 1)
+                        if enemy not in self.attacked_list:
+                            # 结算伤害
+                            enemy.damage(self.attack * attack_coefficient, self.name)
+                            self.attacked_list.append(enemy)
                 # 技能效果
                 if self.name == 'jie':
                     if image_index == 1 and not self.bullet_launched:
                         if self.is_attacking == 1:
-                            bullet = Bullet('fireball', 5, self.reflect, 5, False, 50, True)
+                            bullet = Bullet('fireball', 5, self.reflect, self.attack * attack_coefficient, False, 50,
+                                            True, self.name)
                             bullet.rect.x = (self.attack_x - 20) if self.reflect else (self.attack_x + 20)
                             bullet.rect.y = self.attack_y - 20
                             Globles.add_bullet(bullet)
@@ -108,11 +140,43 @@ class Character(PygameObject):
                             Globles.add_buff(self, 'mhp_up', 15, 1.5)
                             Globles.add_buff(self, 'def_up', 15, 1.5)
                             Globles.add_buff(self, 'heal', 5, 5)
-                            bullet = Bullet('wind', 0, self.reflect, 5, False, 150, False)
+                            bullet = Bullet('wind', 0, self.reflect, 0, False, 150, False, self.name)
                             bullet.rect.x = self.attack_x - 70
                             bullet.rect.y = self.attack_y - 70
                             Globles.add_bullet(bullet, 0)
                             self.bullet_launched = True
+                    if self.is_attacking == 2:
+                        attack_range_l = self.attack_x - 60
+                        attack_range_r = self.attack_x + self.rect.width + 60
+                        if Globles.is_debug:
+                            pygame.draw.rect(screen, (255, 0, 0), (
+                                attack_range_l, self.attack_y, attack_range_r - attack_range_l, self.rect.height), 1)
+                        if image_index < 13:
+                            for enemy in Globles.get_monster_list():
+                                if attack_range_l < enemy.rect.x < attack_range_r or attack_range_l < enemy.rect.x + enemy.rect.width < attack_range_r:
+                                    if Globles.is_debug:
+                                        pygame.draw.rect(screen, (0, 255, 0),
+                                                         (enemy.rect.x, enemy.rect.y, enemy.rect.width,
+                                                          enemy.rect.height), 1)
+                                    if enemy.rect.x + enemy.rect.width < self.attack_x:
+                                        enemy.rect.x += 1
+                                    elif enemy.rect.x > self.attack_x + self.rect.width:
+                                        enemy.rect.x -= 1
+                        if 13 <= image_index <= 15:
+                            for enemy in Globles.get_monster_list():
+                                if attack_range_l < enemy.rect.x < attack_range_r or attack_range_l < enemy.rect.x + enemy.rect.width < attack_range_r:
+                                    if Globles.is_debug:
+                                        pygame.draw.rect(screen, (0, 255, 0),
+                                                         (enemy.rect.x, enemy.rect.y, enemy.rect.width,
+                                                          enemy.rect.height), 1)
+                                    if enemy not in self.attacked_list:
+                                        # 结算伤害
+                                        enemy.damage(self.attack * attack_coefficient, self.name)
+                                        self.attacked_list.append(enemy)
+                                    if enemy.rect.x + enemy.rect.width / 2 < self.attack_x + self.rect.width / 2:
+                                        enemy.rect.x -= 10
+                                    else:
+                                        enemy.rect.x += 10
                 elif self.name == 'yichen':
                     if image_index == 1 and not self.bullet_launched:
                         if self.is_attacking == 2:
@@ -120,21 +184,52 @@ class Character(PygameObject):
                             if ratio >= 0.8:
                                 Globles.add_buff(self, 'def_down', 10, 2)
                                 Globles.add_buff(self, 'atk_up', 10, 2)
-                                Globles.add_buff(self, 'poison', 3, 2)
+                                Globles.add_buff(self, 'poison', 3, 1)
                                 Globles.add_buff(self, 'agi_up', 3, 2)
-                            elif ratio >= 0.6:
+                            elif ratio >= 0.4:
                                 Globles.add_buff(self, 'def_down', 10, 1.5)
                                 Globles.add_buff(self, 'atk_up', 10, 1.5)
-                                Globles.add_buff(self, 'poison', 3)
+                                Globles.add_buff(self, 'poison', 3, 0.5)
                                 Globles.add_buff(self, 'agi_up', 3, 1.5)
-                            elif ratio >= 0.4:
-                                Globles.add_buff(self, 'def_up', 10, 1.5)
-                                Globles.add_buff(self, 'atk_down', 10, 1.5)
-                            else:
-                                Globles.add_buff(self, 'def_up', 10, 2)
-                                Globles.add_buff(self, 'atk_down', 10, 2)
-                                Globles.add_buff(self, 'heal', 3)
                             self.bullet_launched = True
+                    if self.is_attacking == 1:
+                        if image_index == 4:
+                            for enemy in Globles.get_monster_list():
+                                if attack_range_l < enemy.rect.x < attack_range_r or attack_range_l < enemy.rect.x + enemy.rect.width < attack_range_r:
+                                    if Globles.is_debug:
+                                        pygame.draw.rect(screen, (0, 255, 0),
+                                                         (enemy.rect.x, enemy.rect.y, enemy.rect.width, enemy.rect.height),
+                                                         1)
+                                    if enemy not in self.attacked_list:
+                                        # 结算伤害
+                                        enemy.damage(self.attack * attack_coefficient, self.name)
+                                        self.attacked_list.append(enemy)
+                                        if 'yin' not in enemy.buff_list.keys():
+                                            Globles.add_buff(enemy, 'yin', -1)
+                                            Globles.FloatText('YIN', 'purple', enemy.rect.x, enemy.rect.y, 200)
+                                        elif enemy.buff_list['yin'][0] is not True:
+                                            Globles.add_buff(enemy, 'yin', -1)
+                                            Globles.FloatText('YIN', 'purple', enemy.rect.x, enemy.rect.y, 200)
+                        elif image_index == 5:
+                            self.attacked_list.clear()
+                        elif image_index == 9:
+                            for enemy in Globles.get_monster_list():
+                                if attack_range_l < enemy.rect.x < attack_range_r or attack_range_l < enemy.rect.x + enemy.rect.width < attack_range_r:
+                                    if Globles.is_debug:
+                                        pygame.draw.rect(screen, (0, 255, 0),
+                                                         (enemy.rect.x, enemy.rect.y, enemy.rect.width, enemy.rect.height),
+                                                         1)
+                                    if enemy not in self.attacked_list:
+                                        # 结算伤害
+                                        enemy.damage(self.attack * attack_coefficient, self.name)
+                                        self.attacked_list.append(enemy)
+                                        if 'yang' not in enemy.buff_list.keys():
+                                            Globles.add_buff(enemy, 'yang', -1)
+                                            Globles.FloatText('YANG', 'orange', enemy.rect.x, enemy.rect.y, 200)
+                                        elif enemy.buff_list['yang'][0] is not True:
+                                            Globles.add_buff(enemy, 'yang', -1)
+                                            Globles.FloatText('YANG', 'orange', enemy.rect.x, enemy.rect.y, 200)
+
         # 播放当前动作
         elif not self.halt:
             self.image = self.imageset[self.gesture][pygame.time.get_ticks() // 200 % len(self.imageset[self.gesture])]
@@ -271,10 +366,143 @@ class Character(PygameObject):
                 self.halt = True
 
 
+class Enemy(PygameObject):
+    def __init__(self, enemy_name, x, y, purified=False) -> None:
+        if purified:
+            super().__init__(Globles.get_enemy_image(enemy_name), 0, 1, x, y)
+            self.type = 'purified_enemy'
+        else:
+            super().__init__(Globles.get_enemy_image(enemy_name), 0, Globles.get_enemy_stat(enemy_name, 0), x, y)
+        self.name = enemy_name
+        self.purified = purified
+        if not purified:
+            self.type = 'enemy'
+            self.speed = Globles.get_enemy_stat(self.name, 0)
+            self.max_hp = Globles.get_enemy_stat(enemy_name, 2)
+            self.hp = self.max_hp
+            self.attack = Globles.get_enemy_stat(enemy_name, 3)
+            self.defence = Globles.get_enemy_stat(enemy_name, 4)
+            self.buff_list = {}
+
+    def damage(self, attack, source):
+        # 受到伤害计算
+        if attack == 0:
+            return
+        attack *= (10 - self.defence) / 10
+        if attack <= 0:
+            attack = 1
+        self.hp -= attack
+        Globles.debug("{}受到了来自{}的{}伤害, 剩余生命{}".format(self.name, source, attack, self.hp), who='Sprites')
+        Globles.FloatText(str(attack), "red", self.rect.x, self.rect.y)
+
+    def purify(self):
+
+        # 木桩子肯定不需要净化~
+        if self.name == 'stump':
+            Globles.remove_monster(self)
+            del self
+            return
+
+        # 净化对应关系
+        counterpart = {'bat': 'butterfly',
+                       'scorpion': 'cat'}
+        # 被净化
+        Globles.debug("敌人{}已被净化!".format(self.name), who='Sprites')
+        Globles.remove_monster(self)
+        purified = Enemy(counterpart[self.name], self.rect.x, self.rect.y, purified=True)
+        Globles.add_sprite(purified, layer=0)
+        Globles.FloatText("Purified", "green", self.rect.x, self.rect.y, 150)
+        bullet = Bullet('purify', 0, self.reflect, 0, False, 250, False, self.name)
+        bullet.rect.x = self.rect.x
+        bullet.rect.y = self.rect.y
+        Globles.add_bullet(bullet)
+        del self
+
+    def update(self, screen):
+        # 播放当前动作
+        self.image = self.imageset[self.gesture][pygame.time.get_ticks() // 200 % len(self.imageset[self.gesture])]
+        if self.reflect:
+            self.image = pygame.transform.flip(self.image, True, False)
+
+        # 自动行走
+        if self.reflect:
+            if CheckMove(self.rect.x, -self.speed):
+                self.rect.x -= self.speed
+            elif self.purified:
+                Globles.remove_sprite(self)
+                del self
+                return
+            else:
+                self.reflect = False
+        else:
+            if CheckMove(self.rect.x + self.rect.width, self.speed):
+                self.rect.x += self.speed
+            elif self.purified:
+                Globles.remove_sprite(self)
+                del self
+                return
+            else:
+                self.reflect = True
+
+        if self.purified:
+            return
+
+        # 击败检测
+        if self.hp <= 0:
+            self.purify()
+            return
+
+        # Buff结算
+        self.defence = Globles.get_enemy_stat(self.name, 4)
+        self.attack = Globles.get_enemy_stat(self.name, 3)
+        self.max_hp = Globles.get_enemy_stat(self.name, 2)
+        self.speed = Globles.get_enemy_stat(self.name, 0)
+        for buff_name in self.buff_list.keys():
+            buff = self.buff_list.get(buff_name, False)
+            if not buff[0]:
+                continue
+            if buff[0] >= pygame.time.get_ticks() or buff[0] is True:
+                if buff_name == 'def_up':
+                    self.defence *= buff[1]
+                if buff_name == 'def_down':
+                    self.defence /= buff[1]
+                if buff_name == 'atk_up':
+                    self.attack *= buff[1]
+                if buff_name == 'atk_down':
+                    self.attack /= buff[1]
+                if buff_name == 'mhp_up':
+                    self.max_hp *= buff[1]
+                if buff_name == 'mhp_down':
+                    self.max_hp /= buff[1]
+                if buff_name == 'heal':
+                    if self.hp < self.max_hp:
+                        self.hp += 0.02 * buff[1]
+                if buff_name == 'poison':
+                    if self.hp > self.max_hp * 0.2:
+                        self.hp -= 0.02 * buff[1]
+        if 'yin' in self.buff_list.keys() and 'yang' in self.buff_list.keys():
+            if self.buff_list['yin'][0] is True and self.buff_list['yang'][0] is True:
+                self.buff_list['yin'] = (pygame.time.get_ticks() + 2000, 1)
+                self.buff_list['yang'] = (pygame.time.get_ticks() + 2000, 1)
+                Globles.FloatText('YIN·YANG', 'red', self.rect.x, self.rect.y, 125)
+                bullet = Bullet('explosion', 0, self.reflect, 0, False, 100, False, 'yichen')
+                bullet.rect.x = self.rect.x
+                bullet.rect.y = self.rect.y
+                Globles.add_bullet(bullet)
+
+        if self.hp > self.max_hp:
+            self.hp = self.max_hp
+
+        # 显示HP和Buff
+        if self.name != 'stump':
+            ShowHP(screen, self.rect.x, self.rect.y, self.hp, self.max_hp)
+        show_buff(screen, self.rect.x, self.rect.y, self.buff_list)
+
+
 class Bullet(pygame.sprite.Sprite):
     """ This class represents the bullet . """
 
-    def __init__(self, effect_name, speed, reflect, damage, simple, effect_speed, self_destroy):
+    def __init__(self, effect_name, speed, reflect, damage, simple, effect_speed, self_destroy, owner):
         # Call the parent class (Sprite) constructor
         super().__init__()
         self.type = 'effect'
@@ -289,6 +517,20 @@ class Bullet(pygame.sprite.Sprite):
         self.damage = damage
         self.create_time = pygame.time.get_ticks()
         self.self_destroy = self_destroy
+        self.owner = owner
+
+    def destroy(self):
+        if self.name == 'explosion':
+            enemy_hit_list = pygame.sprite.spritecollide(self, Globles.get_monster_list(), False)
+            for enemy in enemy_hit_list:
+                enemy.damage(10, "{}的{}".format(self.owner, self.name))
+                if random.randint(0, 1) == 0:
+                    Globles.add_buff(enemy, 'yin', -1)
+                    Globles.FloatText('YIN·Ω', 'purple', enemy.rect.x, enemy.rect.y, 200)
+                else:
+                    Globles.add_buff(enemy, 'yang', -1)
+                    Globles.FloatText('YANG·Ω', 'orange', enemy.rect.x, enemy.rect.y, 200)
+        Globles.remove_bullet(self)
 
     def update(self, screen):
         if self.reflect:
@@ -301,7 +543,7 @@ class Bullet(pygame.sprite.Sprite):
         if self.reflect:
             self.image = pygame.transform.flip(self.image, True, False)
         if pygame.time.get_ticks() - self.create_time >= len(self.imageset) * self.effect_speed:
-            Globles.remove_bullet(self)
+            self.destroy()
 
 
 def ShowHP(screen, x, y, hp, max_hp, is_player=False):
@@ -365,11 +607,29 @@ def show_buff(screen, x, y, buff_list, is_player=False):
                     x_shift = -20
 
 
-def CheckMove(x, y, dx, dy):
+def CheckMove(x, dx):
     des_x = x + dx
-    des_y = y + dy
-    (screen_w, screen_h) = Globles.get_screen_size()
-    if 0 < des_x < screen_w and 0 < des_y < screen_h:
+    (movable_l, movable_r) = Globles.get_movable_area()
+    if movable_l < des_x < movable_r:
         return True
     else:
         return False
+
+
+def bulletMech():
+    (screen_w, screen_h) = Globles.get_screen_size()
+    for bullet in Globles.get_bullet_list():
+        enemy_hit_list = pygame.sprite.spritecollide(bullet, Globles.get_monster_list(), False)
+        # Remove the bullet if it flies up off the screen
+        if not 0 < bullet.rect.x < screen_w or not 0 < bullet.rect.y < screen_h and bullet.self_destroy:
+            Globles.remove_bullet(bullet)
+        for enemy in enemy_hit_list:
+            enemy.damage(bullet.damage, "{}的{}".format(bullet.owner, bullet.name))
+            if bullet.self_destroy:
+                Globles.remove_bullet(bullet)
+
+
+def spawn_enemy(enemy_name, x, y):
+    enemy = Enemy(enemy_name, x, y)
+    Globles.add_monster(enemy)
+    Globles.debug("已在({}, {})添加敌人{}".format(x, y, enemy_name), type='success', who='Globles')

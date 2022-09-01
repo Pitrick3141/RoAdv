@@ -31,6 +31,8 @@ def debug(text: str, **kwargs):
         info_from = '游戏页面'
     elif kwargs.get('who') == 'Globles':
         info_from = '全局'
+    elif kwargs.get('who') == 'Sprites':
+        info_from = '精灵'
 
     # 错误信息
     if kwargs.get('type') == 'error':

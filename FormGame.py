@@ -1,6 +1,5 @@
 import random
 import sys
-
 import pygame
 import Globles
 import PygameObject
@@ -25,6 +24,9 @@ class FormGame:
 
         # 是否完成
         self.done = False
+
+        # 剩余敌人数量
+        self.enemy_cnt = 0
 
         # 初始化阶段
         Globles.init_stage()
@@ -183,48 +185,55 @@ class FormGame:
                     Globles.show_text(self.screen, "4X>>>>", 550, 20,
                                       color='red', alpha=about_alpha, size=25)
             elif Globles.get_stage() == 1:
-                Globles.show_text(self.screen,
-                                  "Prologue",
-                                  Globles.get_screen_size()[0] / 2, 200,
-                                  color='black', alpha=about_alpha, size=50, middle=True)
-                Globles.show_text(self.screen,
-                                  "序章",
-                                  Globles.get_screen_size()[0] / 2, 140,
-                                  color='black', alpha=about_alpha, size=50, middle=True)
-                if about_reverse == 0:
-                    about_alpha += 3
-                    if about_alpha > 500:
-                        about_reverse = -1
-                if about_alpha > 0 and about_reverse == -1:
-                    about_alpha -= 3
-                if hero.rect.x + 50 > Globles.get_screen_size()[0] and bg_index == 2:
-                    bg_index = 3
-                    hero.rect.x = 80
-                if hero.rect.x < 60 and bg_index == 3:
-                    bg_index = 2
-                    hero.rect.x = Globles.get_screen_size()[0] - 70
-                if hero.rect.x > 300 and bg_index == 3:
-                    Globles.next_stage()
-                    about_reverse = 0
-                    about_alpha = 0
-            if Globles.get_stage() == 2:
-                Globles.show_text(self.screen,
-                                  "To be Continued",
-                                  Globles.get_screen_size()[0] / 2, 200,
-                                  color='black', alpha=about_alpha, size=50, middle=True)
-                Globles.show_text(self.screen,
-                                  "未完待续",
-                                  Globles.get_screen_size()[0] / 2, 140,
-                                  color='black', alpha=about_alpha, size=50, middle=True)
-                if about_reverse == 0:
-                    about_alpha += 3
-                    if about_alpha > 500:
-                        about_reverse = -1
-                if about_alpha > 0 and about_reverse == -1:
-                    about_alpha -= 3
+                if bg_index == 2:
+                    if "序章" not in Globles.title_pool:
+                        Globles.TitleText("序章", "Prologue", 'black')
+                        Globles.TitleText("0-1", "", 'black')
+                    if Globles.get_battle_state() == 0:
+                        Globles.set_movable_area(0, 680)
+                        PygameObject.spawn_enemy('bat', 250, 180)
+                    if Globles.get_battle_state() == 2:
+                        if "完成" not in Globles.title_pool:
+                            Globles.titles.clear()
+                            Globles.TitleText("完成", "Finished", 'orange')
+                        if hero.rect.x > 620:
+                            bg_index = 3
+                            hero.rect.x = 80
+                            Globles.next_wave()
+                            Globles.title_pool.remove("完成")
+                elif bg_index == 3:
+                    for enemy in Globles.get_monster_list():
+                        if enemy.rect.x > 300:
+                            enemy.reflect = True
+                        if enemy.rect.x < 80:
+                            enemy.reflect = False
+                    if "0-2" not in Globles.title_pool:
+                        Globles.titles.clear()
+                        Globles.TitleText("0-2", "", 'black')
+                    if Globles.get_battle_state() == 0:
+                        Globles.set_movable_area(80, 350)
+                        PygameObject.spawn_enemy('scorpion', 280, 210)
+                        PygameObject.spawn_enemy('scorpion', 250, 210)
+                        PygameObject.spawn_enemy('bat', 150, 180)
+                    if Globles.get_battle_state() == 2:
+                        if "完成" not in Globles.title_pool:
+                            Globles.titles.clear()
+                            Globles.TitleText("完成", "Finished", 'orange')
+                        if hero.rect.x > 300:
+                            bg_index = 4
+                            hero.rect.x = 80
+                            Globles.next_wave()
+                            Globles.title_pool.remove("完成")
+                    elif hero.rect.x > 300:
+                        hero.rect.x = 300
+
             if Globles.get_stage() >= 1:
+                PygameObject.bulletMech()
                 Globles.update_sprites(self.screen)
                 Globles.draw_sprites(self.screen)
+
+            # 显示标题和悬浮文本
+            Globles.update_texts(self.screen)
 
             # 更新页面
             pygame.display.flip()
