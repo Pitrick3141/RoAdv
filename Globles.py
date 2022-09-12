@@ -178,7 +178,28 @@ class Globles:
                                    'forestright': [
                                        pygame.image.load(self._background_path / "forestright_{}.png".format(i)) for i
                                        in range(1, 5)
-                                   ]}
+                                   ],
+                                   'treeleft': [
+                                       pygame.image.load(self._background_path / "treeleft_{}.png".format(i)) for i
+                                       in range(1, 9)
+                                   ],
+                                   'treeright': [
+                                       pygame.image.load(self._background_path / "treeright_{}.png".format(i)) for i
+                                       in range(1, 9)
+                                   ],
+                                   'fountain': [
+                                       pygame.image.load(self._background_path / "fountain_{}.png".format(i)) for i
+                                       in range(1, 13)
+                                   ],
+                                   'fountainnight': [
+                                       pygame.image.load(self._background_path / "fountainnight_{}.png".format(i)) for i
+                                       in range(1, 5)
+                                   ],
+                                   'palace': [
+                                       pygame.image.load(self._background_path / "palace_{}.png".format(i)) for i
+                                       in range(1, 17)
+                                   ],
+                                   }
 
         """
         状态素材
@@ -216,14 +237,14 @@ class Globles:
                                     "王奕辰",
                                     "侯申然",
                                     "张杰",
-                                    "王伊诺",
+                                    "Nana",
                                     "理塘悦刻魔王",
                                     "麦克肯威"],
                              'en': ["Character",
                                     "Yichen W",
                                     "Shenran H",
                                     "Jie Z",
-                                    "Yinuo W",
+                                    "Nana",
                                     "LTDZ",
                                     "MacKenway"]}
 
@@ -523,6 +544,9 @@ class Globles:
     def get_movable_area(self):
         return self._movable_l, self._movable_r
 
+    def get_all_sprites(self):
+        return self._all_sprites_list
+
 
 # 标题池和悬浮文字池
 title_pool = []
@@ -532,11 +556,12 @@ float_texts = []
 
 class TitleText:
     # 展示闪烁标题
-    def __init__(self, text_zh, text_en, color):
+    def __init__(self, text_zh, text_en, color, size=50):
         self.text_zh = text_zh
         self.text_en = text_en
         self.color = color
         self.alpha = 0
+        self.size = size
         self.reverse = False
         title_pool.append(text_zh)
         titles.append(self)
@@ -547,12 +572,12 @@ class TitleText:
                   self.text_zh,
                   get_screen_size()[0] / 2, 140,
                   color=self.color,
-                  alpha=self.alpha, size=50, middle=True)
+                  alpha=self.alpha, size=self.size, middle=True)
         show_text(screen,
                   self.text_en,
-                  get_screen_size()[0] / 2, 200,
+                  get_screen_size()[0] / 2, 150 + self.size,
                   color=self.color,
-                  alpha=self.alpha, size=50, middle=True)
+                  alpha=self.alpha, size=self.size, middle=True)
         if not self.reverse:
             self.alpha += 3
             if self.alpha > 500:
@@ -761,6 +786,7 @@ def get_current_wave():
 
 def next_wave():
     globles.next_wave()
+    remove_all_purified()
 
 
 def update_texts(screen):
@@ -777,3 +803,11 @@ def set_movable_area(left, right):
 
 def get_movable_area():
     return globles.get_movable_area()
+
+
+def remove_all_purified():
+    sprites_list = globles.get_all_sprites()
+    for sprite in sprites_list:
+        if sprite.type == 'purified_enemy':
+            globles.remove_sprite(sprite)
+    debug("已移除所有净化的敌人", type='success', who='Globles')

@@ -38,6 +38,9 @@ class FormGame:
         debug("进入游戏页面循环体", who=self.__class__.__name__)
         Globles.next_stage()
 
+        # 暂停
+        is_hold = False
+
         # 背景文本列表
         about_texts_en = ["A Long, Long Time ago",
                           "There was a small town called {}".format(Globles.get_chara_name('place')),
@@ -89,10 +92,100 @@ class FormGame:
         # 当前的背景序号
         bg_index = 0
         # 背景列表
-        bg_list = ['bg', 'bg_2', 'forestleft', 'forestright']
+        bg_list = ['bg', 'bg_2', 'forestleft', 'forestright', "treeleft", "treeright", "fountain", "fountainnight",
+                   "palace"]
+
+        # 控制每关敌人
+        enemies = {'forestleft': [('bat', 150, 180)],
+                   'forestright': [('scorpion', 280, 210),
+                                   ('scorpion', 250, 210),
+                                   ('bat', 150, 180)],
+                   'treeleft': [('scorpion', 200, 360),
+                                ('scorpion', 220, 360),
+                                ('scorpion', 240, 360),
+                                ('scorpion', 280, 360),
+                                ('bat', 150, 340),
+                                ('bat', 250, 340),
+                                ('bat', 300, 340)],
+                   'treeright': [('scorpion', 200, 360),
+                                 ('scorpion', 220, 360),
+                                 ('scorpion', 240, 360),
+                                 ('scorpion', 280, 360),
+                                 ('bat', 150, 340),
+                                 ('bat', 250, 340),
+                                 ('bat', 300, 340)],
+                   'fountain': [('scorpion', 200, 380),
+                                ('scorpion', 220, 380),
+                                ('scorpion', 240, 380),
+                                ('scorpion', 280, 380),
+                                ('bat', 150, 360),
+                                ('bat', 250, 360),
+                                ('bat', 300, 360)],
+                   'fountainnight': [('scorpion', 200, 380),
+                                     ('scorpion', 220, 380),
+                                     ('scorpion', 240, 380),
+                                     ('scorpion', 280, 380),
+                                     ('bat', 150, 360),
+                                     ('bat', 250, 360),
+                                     ('bat', 300, 360)],
+                   'palace': [('scorpion', 200, 380),
+                              ('scorpion', 220, 380),
+                              ('scorpion', 240, 380),
+                              ('scorpion', 280, 380),
+                              ('bat', 150, 360),
+                              ('bat', 250, 360),
+                              ('bat', 300, 360)],
+                   }
+
+        # 控制每关标题
+        titles = {'forestleft': [("序章", "Prologue"), ("0-1", ""), ("净化所有敌人", "Purify all enemies")],
+                  'forestright': [("0-2", "")],
+                  'treeleft': [("第一章", "Chapter 1"), ("1-1", "")],
+                  'treeright': [("1-2", "")],
+                  'fountain': [("第二章", "Chapter 2"), ("2-1", "")],
+                  'fountainnight': [("2-2", "")],
+                  'palace': [("终章", "Final")]}
+
+        # 控制剧情播放
+        plots_before = {'forestleft': [("{}和{}做好了准备，".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
+                                        "{} and {} get everything prepared".format(Globles.get_chara_name('prot', 'en'),
+                                                                                   Globles.get_chara_name('friend', 'en')),
+                                        20),
+                                       ("进入了小镇边的森林",
+                                        "and went into the forest besides the town",
+                                        20),
+                                       ("突然一只黑影从树丛中穿出，",
+                                        "Suddenly a shadow dashed from the bush,",
+                                        20),
+                                       ("{}定睛一看，是一只漆黑的蝙蝠，正向他冲来。".format(Globles.get_chara_name('prot', 'zh')),
+                                        "{} found that it was a black bat charging towards him.".format(Globles.get_chara_name('prot', 'en')),
+                                        20)],
+                        'forestright': [("0-2", "")],
+                        'treeleft': [("第一章", "Chapter 1"), ("1-1", "")],
+                        'treeright': [("1-2", "")],
+                        'fountain': [("第二章", "Chapter 2"), ("2-1", "")],
+                        'fountainnight': [("2-2", "")],
+                        'palace': [("终章", "Final")]}
+
+        plots_after = {'forestleft': [("序章", "Prologue"), ("0-1", ""), ("净化所有敌人", "Purify all enemies")],
+                       'forestright': [("0-2", "")],
+                       'treeleft': [("第一章", "Chapter 1"), ("1-1", "")],
+                       'treeright': [("1-2", "")],
+                       'fountain': [("第二章", "Chapter 2"), ("2-1", "")],
+                       'fountainnight': [("2-2", "")],
+                       'palace': [("终章", "Final")]}
+
+        # 控制每关移动范围
+        movable_limits = {'forestleft': (0, 680, 180),
+                          'forestright': (80, 350, 180),
+                          'treeleft': (40, 700, 360),
+                          'treeright': (0, 700, 360),
+                          'fountain': (0, 700, 360),
+                          'fountainnight': (0, 700, 360),
+                          'palace': (0, 700, 360)}
 
         # 英雄列表
-        hero_list = ['none', 'yichen', 'shenran', 'jie', 'yinuo']
+        hero_list = ['none', 'yichen', 'shenran', 'jie', 'nana']
 
         # 实例化英雄对象
         hero = PygameObject.Character(hero_list[Globles.get_protagonist()], 30, 180)
@@ -111,12 +204,16 @@ class FormGame:
                 if event.type == pygame.KEYDOWN:
                     key_list = pygame.key.get_pressed()
                     # 按下Q跳过剧情
-                    if key_list[pygame.K_q] and Globles.get_stage() == 0:
-                        Globles.next_stage()
-                        about_reverse = 0
-                        about_alpha = 0
-                        debug("已跳过剧情", type='info', who=self.__class__.__name__)
-                        bg_index = 2
+                    if key_list[pygame.K_q]:
+                        if Globles.get_stage() == 0:
+                            Globles.next_stage()
+                            about_reverse = 0
+                            about_alpha = 0
+                            debug("已跳过剧情", type='info', who=self.__class__.__name__)
+                            bg_index = 2
+                        else:
+                            Globles.titles.clear()
+                            debug("已跳过剧情", type='info', who=self.__class__.__name__)
                     if key_list[pygame.K_LCTRL] or key_list[pygame.K_RCTRL]:
                         if about_speed == 2:
                             about_speed = 4
@@ -185,51 +282,38 @@ class FormGame:
                     Globles.show_text(self.screen, "4X>>>>", 550, 20,
                                       color='red', alpha=about_alpha, size=25)
             elif Globles.get_stage() == 1:
-                if bg_index == 2:
-                    if "序章" not in Globles.title_pool:
-                        Globles.TitleText("序章", "Prologue", 'black')
-                        Globles.TitleText("0-1", "", 'black')
-                    if Globles.get_battle_state() == 0:
-                        Globles.set_movable_area(0, 680)
-                        PygameObject.spawn_enemy('bat', 250, 180)
-                    if Globles.get_battle_state() == 2:
-                        if "完成" not in Globles.title_pool:
-                            Globles.titles.clear()
-                            Globles.TitleText("完成", "Finished", 'orange')
-                        if hero.rect.x > 620:
-                            bg_index = 3
-                            hero.rect.x = 80
-                            Globles.next_wave()
-                            Globles.title_pool.remove("完成")
-                elif bg_index == 3:
-                    for enemy in Globles.get_monster_list():
-                        if enemy.rect.x > 300:
-                            enemy.reflect = True
-                        if enemy.rect.x < 80:
-                            enemy.reflect = False
-                    if "0-2" not in Globles.title_pool:
+                if plots_before.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
+                    is_hold = True
+                    for plot in plots_before.get(bg_list[bg_index]):
+                        Globles.TitleText(plot[0], plot[1], 'black', plot[2])
+                elif not Globles.titles:
+                    is_hold = False
+                if titles.get(bg_list[bg_index])[0][0] not in Globles.title_pool and not is_hold:
+                    for title in titles.get(bg_list[bg_index]):
+                        Globles.TitleText(title[0], title[1], 'red' if bg_list[bg_index] == 'palace' else 'black')
+                if Globles.get_battle_state() == 0:
+                    movable_area = movable_limits.get(bg_list[bg_index])
+                    Globles.set_movable_area(movable_area[0], movable_area[1])
+                    for enemy in enemies.get(bg_list[bg_index]):
+                        PygameObject.spawn_enemy(enemy[0], enemy[1], enemy[2])
+                if Globles.get_battle_state() == 2:
+                    if "关卡完成" not in Globles.title_pool:
                         Globles.titles.clear()
-                        Globles.TitleText("0-2", "", 'black')
-                    if Globles.get_battle_state() == 0:
-                        Globles.set_movable_area(80, 350)
-                        PygameObject.spawn_enemy('scorpion', 280, 210)
-                        PygameObject.spawn_enemy('scorpion', 250, 210)
-                        PygameObject.spawn_enemy('bat', 150, 180)
-                    if Globles.get_battle_state() == 2:
-                        if "完成" not in Globles.title_pool:
-                            Globles.titles.clear()
-                            Globles.TitleText("完成", "Finished", 'orange')
-                        if hero.rect.x > 300:
-                            bg_index = 4
-                            hero.rect.x = 80
+                        Globles.TitleText("关卡完成", "Level Finished", 'orange')
+                    if hero.rect.x > movable_limits.get(bg_list[bg_index])[1] - 40:
+                        if bg_list[bg_index] == 'palace':
+                            Globles.next_stage()
+                        else:
+                            bg_index += 1
+                            hero.rect.x = movable_limits.get(bg_list[bg_index])[0]
+                            hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
                             Globles.next_wave()
-                            Globles.title_pool.remove("完成")
-                    elif hero.rect.x > 300:
-                        hero.rect.x = 300
+                            Globles.title_pool.remove("关卡完成")
 
             if Globles.get_stage() >= 1:
-                PygameObject.bulletMech()
-                Globles.update_sprites(self.screen)
+                if not is_hold:
+                    PygameObject.bulletMech()
+                    Globles.update_sprites(self.screen)
                 Globles.draw_sprites(self.screen)
 
             # 显示标题和悬浮文本
