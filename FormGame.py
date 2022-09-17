@@ -41,6 +41,12 @@ class FormGame:
         # 暂停
         is_hold = False
 
+        # 助战
+        is_assisted = False
+
+        # 重新挑战
+        is_reset = False
+
         # 背景文本列表
         about_texts_en = ["A Long, Long Time ago",
                           "There was a small town called {}".format(Globles.get_chara_name('place')),
@@ -96,7 +102,7 @@ class FormGame:
                    "palace"]
 
         # 控制每关敌人
-        enemies = {'forestleft': [('bat', 150, 180)],
+        enemies = {'forestleft': [('bat', 600, 180)],
                    'forestright': [('scorpion', 280, 210),
                                    ('scorpion', 250, 210),
                                    ('bat', 150, 180)],
@@ -151,8 +157,8 @@ class FormGame:
                                         "{} and {} get everything prepared".format(Globles.get_chara_name('prot', 'en'),
                                                                                    Globles.get_chara_name('friend', 'en')),
                                         20),
-                                       ("进入了小镇边的森林",
-                                        "and went into the forest besides the town",
+                                       ("进入了小镇边的森林。",
+                                        "and went into the forest besides the town.",
                                         20),
                                        ("突然一只黑影从树丛中穿出，",
                                         "Suddenly a shadow dashed from the bush,",
@@ -160,24 +166,36 @@ class FormGame:
                                        ("{}定睛一看，是一只漆黑的蝙蝠，正向他冲来。".format(Globles.get_chara_name('prot', 'zh')),
                                         "{} found that it was a black bat charging towards him.".format(Globles.get_chara_name('prot', 'en')),
                                         20)],
-                        'forestright': [("0-2", "")],
-                        'treeleft': [("第一章", "Chapter 1"), ("1-1", "")],
-                        'treeright': [("1-2", "")],
-                        'fountain': [("第二章", "Chapter 2"), ("2-1", "")],
-                        'fountainnight': [("2-2", "")],
-                        'palace': [("终章", "Final")]}
+                        'forestright': [("随着{}和{}逐渐深入森林,".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
+                                         "As {} and {} went further into the forest".format(Globles.get_chara_name('prot', 'en'),
+                                                                                            Globles.get_chara_name('friend', 'en')),
+                                         20),
+                                        ("越来越多的魔物从阴影中涌现。",
+                                         "more and more monsters emerged from the shades.",
+                                         20),
+                                        ("他们高举武器，冲向魔物。",
+                                         "They raised their weapons and headed these monsters.",
+                                         20),
+                                        ("拯救{}的使命就在他们的身上".format(Globles.get_chara_name('place', 'zh')),
+                                         "The mission of saving {} is on their back.".format(Globles.get_chara_name('place', 'en')),
+                                         20), ],
+                        'treeleft': [("战前剧情_1_1", "Placeholder", 20)],
+                        'treeright': [("战前剧情_1_2", "Placeholder", 20)],
+                        'fountain': [("战前剧情_2_1", "Placeholder", 20)],
+                        'fountainnight': [("战前剧情_2_2", "Placeholder", 20)],
+                        'palace': [("战前剧情_终章", "Placeholder", 20)]}
 
-        plots_after = {'forestleft': [("序章", "Prologue"), ("0-1", ""), ("净化所有敌人", "Purify all enemies")],
-                       'forestright': [("0-2", "")],
-                       'treeleft': [("第一章", "Chapter 1"), ("1-1", "")],
-                       'treeright': [("1-2", "")],
-                       'fountain': [("第二章", "Chapter 2"), ("2-1", "")],
-                       'fountainnight': [("2-2", "")],
-                       'palace': [("终章", "Final")]}
+        plots_after = {'forestleft': [("战后剧情_0_1", "Placeholder", 20)],
+                       'forestright': [("战后剧情_0_2", "Placeholder", 20)],
+                       'treeleft': [("战后剧情_1_1", "Placeholder", 20)],
+                       'treeright': [("战后剧情_1_2", "Placeholder", 20)],
+                       'fountain': [("战后剧情_2_1", "Placeholder", 20)],
+                       'fountainnight': [("战后剧情_2_2", "Placeholder", 20)],
+                       'palace': [("战后剧情_终章", "Placeholder", 20)]}
 
         # 控制每关移动范围
         movable_limits = {'forestleft': (0, 680, 180),
-                          'forestright': (80, 350, 180),
+                          'forestright': (60, 330, 180),
                           'treeleft': (40, 700, 360),
                           'treeright': (0, 700, 360),
                           'fountain': (0, 700, 360),
@@ -224,6 +242,28 @@ class FormGame:
                         else:
                             about_speed = 2
                             debug("剧情播放速度1x", type='info', who=self.__class__.__name__)
+                    if key_list[pygame.K_r]:
+                        # 复苏英雄
+                        if Globles.is_defeated():
+                            is_reset = True
+                            is_assisted = False
+                            Globles.revive_hero()
+                            hero = PygameObject.Character(hero_list[Globles.get_protagonist()], 30, 180)
+                            Globles.add_sprite(hero, 1)
+                            hero.rect.x = movable_limits.get(bg_list[bg_index])[0]
+                            hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
+                            Globles.next_wave()
+                    if key_list[pygame.K_f]:
+                        # 召唤助战
+                        if Globles.is_defeated():
+                            is_assisted = True
+                            is_reset = False
+                            Globles.revive_hero()
+                            hero = PygameObject.Character(hero_list[3 if Globles.get_protagonist() == 1 else 1], 30, 180)
+                            Globles.add_sprite(hero, 1)
+                            hero.rect.x = movable_limits.get(bg_list[bg_index])[0]
+                            hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
+                            Globles.next_wave()
 
             bg = Globles.get_background_image(bg_list[bg_index])
             bg = pygame.transform.scale(bg, Globles.get_screen_size())
@@ -282,10 +322,30 @@ class FormGame:
                     Globles.show_text(self.screen, "4X>>>>", 550, 20,
                                       color='red', alpha=about_alpha, size=25)
             elif Globles.get_stage() == 1:
-                if plots_before.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
+                if "过了一会，" not in Globles.title_pool and is_reset or is_assisted:
+                    if is_reset:
+                        Globles.TitleText("过了一会，", "After a while,", 'black', 30)
+                        Globles.TitleText("在他们返回营地休整一番之后，",
+                                          "After a preparation back in their camp,", 'black', 30)
+                        Globles.TitleText("{}和{}重新踏上了冒险的旅途".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
+                                          "{} and {} returned to the adventure again.".format(
+                                              Globles.get_chara_name('prot', 'en'),
+                                              Globles.get_chara_name('friend', 'en')), 'black', 30)
+                    elif is_assisted:
+                        Globles.TitleText("过了一会，", "After a while,", 'black', 30)
+                        Globles.TitleText("{}扶起倒地的{}，".format(Globles.get_chara_name('friend', 'zh'), Globles.get_chara_name('prot', 'zh')),
+                                          "{} helped {} to stand up again,".format(Globles.get_chara_name('friend', 'en'),
+                                                                                   Globles.get_chara_name('prot', 'en')),
+                                          'black', 30)
+                        Globles.TitleText("并将他在营地安顿好，", "and settle him back at their camp,", 'black', 30)
+                        Globles.TitleText("在他休整的时候替他净化前方的敌人，",
+                                          "assisting him to purify all enemies during his preparation.", 'black', 30)
+                elif plots_before.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
+                    Globles.titles.clear()
                     is_hold = True
-                    for plot in plots_before.get(bg_list[bg_index]):
-                        Globles.TitleText(plot[0], plot[1], 'black', plot[2])
+                    if not is_reset and not is_assisted:
+                        for plot in plots_before.get(bg_list[bg_index]):
+                            Globles.TitleText(plot[0], plot[1], 'black', plot[2])
                 elif not Globles.titles:
                     is_hold = False
                 if titles.get(bg_list[bg_index])[0][0] not in Globles.title_pool and not is_hold:
@@ -297,10 +357,13 @@ class FormGame:
                     for enemy in enemies.get(bg_list[bg_index]):
                         PygameObject.spawn_enemy(enemy[0], enemy[1], enemy[2])
                 if Globles.get_battle_state() == 2:
-                    if "关卡完成" not in Globles.title_pool:
+                    if plots_after.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
                         Globles.titles.clear()
+                        for plot in plots_after.get(bg_list[bg_index]):
+                            Globles.TitleText(plot[0], plot[1], 'black', plot[2])
+                    if "关卡完成" not in Globles.title_pool:
                         Globles.TitleText("关卡完成", "Level Finished", 'orange')
-                    if hero.rect.x > movable_limits.get(bg_list[bg_index])[1] - 40:
+                    if hero.rect.x > movable_limits.get(bg_list[bg_index])[1] - 50 and not Globles.titles:
                         if bg_list[bg_index] == 'palace':
                             Globles.next_stage()
                         else:

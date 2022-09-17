@@ -238,7 +238,7 @@ class Globles:
                                     "侯申然",
                                     "张杰",
                                     "Nana",
-                                    "理塘悦刻魔王",
+                                    "理塘顶真一郎",
                                     "麦克肯威"],
                              'en': ["Character",
                                     "Yichen W",
@@ -263,6 +263,13 @@ class Globles:
         """
         self._movable_l = 0
         self._movable_r = 700
+
+        """
+        英雄复苏及助战
+        """
+        self._is_defeated = False
+        self._assist_left = 1
+        self._last_wave = -1
 
     def next_stage(self):
         # 进入下一个阶段
@@ -547,6 +554,27 @@ class Globles:
     def get_all_sprites(self):
         return self._all_sprites_list
 
+    def hero_defeat(self):
+        self._is_defeated = True
+        titles.clear()
+        self._last_wave = self._current_wave
+        TitleText("英雄已倒下···", "Hero Defeated", "red", 40)
+        TitleText("按R复苏并重新挑战本关", "Press R to revive and reset the level", "orange", 30)
+        TitleText("按F召唤{}助战".format(get_chara_name("friend", "zh")),
+                  "Press F to summon {} to assist you".format(get_chara_name("friend", "en")),
+                  "orange", 30)
+
+    def is_defeated(self):
+        return self._is_defeated
+
+    def revive_hero(self):
+        self._current_wave = self._last_wave - 1
+        title_pool.clear()
+        titles.clear()
+        for monster in self._monster_list:
+            remove_monster(monster)
+        TitleText("英雄已复苏！", "Hero Revived", "red", 40)
+
 
 # 标题池和悬浮文字池
 title_pool = []
@@ -811,3 +839,15 @@ def remove_all_purified():
         if sprite.type == 'purified_enemy':
             globles.remove_sprite(sprite)
     debug("已移除所有净化的敌人", type='success', who='Globles')
+
+
+def hero_defeat():
+    globles.hero_defeat()
+
+
+def is_defeated():
+    return globles.is_defeated()
+
+
+def revive_hero():
+    globles.revive_hero()

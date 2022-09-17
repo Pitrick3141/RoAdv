@@ -69,6 +69,49 @@ class Character(PygameObject):
         self.bullet_launched = False
         self.buff_list = {}
         self.attacked_list = []
+        self.last_damaged = -1
+
+    def damage(self, attack, source):
+        # 受到伤害计算
+        if attack == 0:
+            return
+        attack *= (10 - self.defence) / 10
+        if attack <= 0:
+            attack = 1
+        self.hp -= attack
+        self.last_damaged = pygame.time.get_ticks()
+        Globles.debug("{}受到了来自{}的{}伤害, 剩余生命{}".format(self.name, source, attack, self.hp), who='Sprites')
+        Globles.FloatText(str(attack), "red", self.rect.x, self.rect.y)
+        if self.hp <= 0:
+            Globles.hero_defeat()
+            Globles.remove_sprite(self)
+            del self
+
+    def cast_attack(self):
+        self.halt = False
+        self.is_attacking = 0
+        self.attack_x = self.rect.x
+        self.attack_y = self.rect.y
+        self.gesture = 2
+        self.last_move = pygame.time.get_ticks()
+
+    def cast_skill_1(self):
+        self.halt = False
+        self.is_attacking = 1
+        self.attack_x = self.rect.x
+        self.attack_y = self.rect.y
+        self.gesture = 3
+        self.last_move = pygame.time.get_ticks()
+        self.bullet_launched = False
+
+    def cast_skill_2(self):
+        self.halt = False
+        self.is_attacking = 2
+        self.attack_x = self.rect.x
+        self.attack_y = self.rect.y
+        self.gesture = 4
+        self.last_move = pygame.time.get_ticks()
+        self.bullet_launched = False
 
     def update(self, screen):
 
@@ -329,28 +372,11 @@ class Character(PygameObject):
         key_list = pygame.key.get_pressed()
         if self.isMoveAllowed and self.is_attacking == -1:
             if key_list[pygame.K_o] and self.buff_list.get('Skill2_CD') is False:
-                self.halt = False
-                self.is_attacking = 2
-                self.attack_x = self.rect.x
-                self.attack_y = self.rect.y
-                self.gesture = 4
-                self.last_move = pygame.time.get_ticks()
-                self.bullet_launched = False
+                self.cast_skill_2()
             elif key_list[pygame.K_i] and self.buff_list.get('Skill1_CD') is False:
-                self.halt = False
-                self.is_attacking = 1
-                self.attack_x = self.rect.x
-                self.attack_y = self.rect.y
-                self.gesture = 3
-                self.last_move = pygame.time.get_ticks()
-                self.bullet_launched = False
+                self.cast_skill_1()
             elif key_list[pygame.K_j]:
-                self.halt = False
-                self.is_attacking = 0
-                self.attack_x = self.rect.x
-                self.attack_y = self.rect.y
-                self.gesture = 2
-                self.last_move = pygame.time.get_ticks()
+                self.cast_attack()
             elif key_list[pygame.K_d]:
                 self.halt = False
                 self.move_right()
@@ -365,6 +391,18 @@ class Character(PygameObject):
             else:
                 self.halt = True
 
+        # 敌人碰撞攻击检测
+        enemy_collide = pygame.sprite.spritecollide(self, Globles.get_monster_list(), False)
+        for enemy in enemy_collide:
+            if pygame.time.get_ticks() - self.last_damaged > 1000:
+                self.damage(enemy.attack, enemy.name)
+                if enemy.rect.x > self.rect.x:
+                    if self.rect.x - 10 > Globles.get_movable_area()[0]:
+                        self.rect.x -= 10
+                else:
+                    if self.rect.x + 10 < Globles.get_movable_area()[1]:
+                        self.rect.x += 10
+
 
 class Enemy(PygameObject):
     def __init__(self, enemy_name, x, y, purified=False) -> None:
@@ -375,6 +413,7 @@ class Enemy(PygameObject):
             super().__init__(Globles.get_enemy_image(enemy_name), 0, Globles.get_enemy_stat(enemy_name, 0), x, y)
         self.name = enemy_name
         self.purified = purified
+        self.last_damaged = -1
         if not purified:
             self.type = 'enemy'
             self.speed = Globles.get_enemy_stat(self.name, 0)
@@ -392,6 +431,7 @@ class Enemy(PygameObject):
         if attack <= 0:
             attack = 1
         self.hp -= attack
+        self.last_damaged = pygame.time.get_ticks()
         Globles.debug("{}受到了来自{}的{}伤害, 剩余生命{}".format(self.name, source, attack, self.hp), who='Sprites')
         Globles.FloatText(str(attack), "red", self.rect.x, self.rect.y)
 
@@ -427,7 +467,8 @@ class Enemy(PygameObject):
         # 自动行走
         if self.reflect:
             if CheckMove(self.rect.x, -self.speed):
-                self.rect.x -= self.speed
+                if pygame.time.get_ticks() - self.last_damaged > 500:
+                    self.rect.x -= self.speed
             elif self.purified:
                 Globles.remove_sprite(self)
                 del self
@@ -436,7 +477,8 @@ class Enemy(PygameObject):
                 self.reflect = False
         else:
             if CheckMove(self.rect.x + self.rect.width, self.speed):
-                self.rect.x += self.speed
+                if pygame.time.get_ticks() - self.last_damaged > 500:
+                    self.rect.x += self.speed
             elif self.purified:
                 Globles.remove_sprite(self)
                 del self
