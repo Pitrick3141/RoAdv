@@ -81,7 +81,7 @@ class Character(PygameObject):
         self.hp -= attack
         self.last_damaged = pygame.time.get_ticks()
         Globles.debug("{}受到了来自{}的{}伤害, 剩余生命{}".format(self.name, source, attack, self.hp), who='Sprites')
-        Globles.FloatText(str(attack), "red", self.rect.x, self.rect.y)
+        Globles.FloatText(str(round(attack, 2)), "red", self.rect.x, self.rect.y)
         if self.hp <= 0:
             Globles.hero_defeat()
             Globles.remove_sprite(self)
@@ -433,7 +433,7 @@ class Enemy(PygameObject):
         self.hp -= attack
         self.last_damaged = pygame.time.get_ticks()
         Globles.debug("{}受到了来自{}的{}伤害, 剩余生命{}".format(self.name, source, attack, self.hp), who='Sprites')
-        Globles.FloatText(str(attack), "red", self.rect.x, self.rect.y)
+        Globles.FloatText(str(round(attack, 2)), "red", self.rect.x, self.rect.y)
 
     def purify(self):
 

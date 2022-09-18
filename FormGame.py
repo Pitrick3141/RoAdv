@@ -117,6 +117,8 @@ class FormGame:
                                  ('scorpion', 220, 360),
                                  ('scorpion', 240, 360),
                                  ('scorpion', 280, 360),
+                                 ('scorpion', 320, 360),
+                                 ('scorpion', 360, 360),
                                  ('bat', 150, 340),
                                  ('bat', 250, 340),
                                  ('bat', 300, 340)],
@@ -124,23 +126,48 @@ class FormGame:
                                 ('scorpion', 220, 380),
                                 ('scorpion', 240, 380),
                                 ('scorpion', 280, 380),
+                                ('scorpion', 320, 380),
+                                ('scorpion', 360, 380),
                                 ('bat', 150, 360),
+                                ('bat', 200, 360),
                                 ('bat', 250, 360),
-                                ('bat', 300, 360)],
+                                ('bat', 300, 360),
+                                ('bat', 350, 360)],
                    'fountainnight': [('scorpion', 200, 380),
-                                     ('scorpion', 220, 380),
-                                     ('scorpion', 240, 380),
-                                     ('scorpion', 280, 380),
+                                    ('scorpion', 220, 380),
+                                    ('scorpion', 240, 380),
+                                    ('scorpion', 260, 380),
+                                    ('scorpion', 280, 380),
+                                    ('scorpion', 300, 380),
+                                    ('scorpion', 320, 380),
+                                    ('scorpion', 340, 380),
                                      ('bat', 150, 360),
                                      ('bat', 250, 360),
-                                     ('bat', 300, 360)],
+                                     ('bat', 350, 360),
+                                     ('bat', 400, 360),
+                                     ('bat', 450, 360),
+                                     ('bat', 500, 360),
+                                     ('bat', 550, 360)],
                    'palace': [('scorpion', 200, 380),
-                              ('scorpion', 220, 380),
-                              ('scorpion', 240, 380),
-                              ('scorpion', 280, 380),
-                              ('bat', 150, 360),
-                              ('bat', 250, 360),
-                              ('bat', 300, 360)],
+                                    ('scorpion', 220, 380),
+                                    ('scorpion', 240, 380),
+                                    ('scorpion', 260, 380),
+                                    ('scorpion', 280, 380),
+                                    ('scorpion', 300, 380),
+                                    ('scorpion', 320, 380),
+                                    ('scorpion', 340, 380),
+                                    ('scorpion', 400, 380),
+                                    ('scorpion', 450, 380),
+                                    ('scorpion', 500, 380),
+                                     ('bat', 150, 360),
+                                     ('bat', 250, 360),
+                                     ('bat', 350, 360),
+                                     ('bat', 400, 360),
+                                     ('bat', 450, 360),
+                                     ('bat', 500, 360),
+                                     ('bat', 550, 360),
+                                     ('bat', 600, 360),
+                                     ('bat', 650, 360)],
                    }
 
         # 控制每关标题
@@ -322,31 +349,32 @@ class FormGame:
                     Globles.show_text(self.screen, "4X>>>>", 550, 20,
                                       color='red', alpha=about_alpha, size=25)
             elif Globles.get_stage() == 1:
-                if "过了一会，" not in Globles.title_pool and is_reset or is_assisted:
-                    if is_reset:
-                        Globles.TitleText("过了一会，", "After a while,", 'black', 30)
-                        Globles.TitleText("在他们返回营地休整一番之后，",
-                                          "After a preparation back in their camp,", 'black', 30)
-                        Globles.TitleText("{}和{}重新踏上了冒险的旅途".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
-                                          "{} and {} returned to the adventure again.".format(
-                                              Globles.get_chara_name('prot', 'en'),
-                                              Globles.get_chara_name('friend', 'en')), 'black', 30)
-                    elif is_assisted:
-                        Globles.TitleText("过了一会，", "After a while,", 'black', 30)
-                        Globles.TitleText("{}扶起倒地的{}，".format(Globles.get_chara_name('friend', 'zh'), Globles.get_chara_name('prot', 'zh')),
-                                          "{} helped {} to stand up again,".format(Globles.get_chara_name('friend', 'en'),
-                                                                                   Globles.get_chara_name('prot', 'en')),
-                                          'black', 30)
-                        Globles.TitleText("并将他在营地安顿好，", "and settle him back at their camp,", 'black', 30)
-                        Globles.TitleText("在他休整的时候替他净化前方的敌人，",
-                                          "assisting him to purify all enemies during his preparation.", 'black', 30)
+                if is_reset or is_assisted:
+                    if "过了一会，" not in Globles.title_pool:
+                        is_hold = True
+                        if is_reset:
+                            Globles.TitleText("过了一会，", "After a while,", 'black', 20)
+                            Globles.TitleText("在他们返回营地休整一番之后，",
+                                            "After a preparation back in their camp,", 'black', 20)
+                            Globles.TitleText("{}和{}重新踏上了冒险的旅途".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
+                                            "{} and {} returned to the adventure again.".format(
+                                                Globles.get_chara_name('prot', 'en'),
+                                                Globles.get_chara_name('friend', 'en')), 'black', 20)
+                        else:
+                            Globles.TitleText("过了一会，", "After a while,", 'black', 20)
+                            Globles.TitleText("{}扶起倒地的{}，".format(Globles.get_chara_name('friend', 'zh'), Globles.get_chara_name('prot', 'zh')),
+                                            "{} helped {} to stand up again,".format(Globles.get_chara_name('friend', 'en'),
+                                                                                    Globles.get_chara_name('prot', 'en')),
+                                            'black', 20)
+                            Globles.TitleText("并将他在营地安顿好，", "and settle him back at their camp,", 'black', 20)
+                            Globles.TitleText("在他休整的时候替他净化前方的敌人，",
+                                            "assisting him to purify all enemies during his preparation.", 'black', 20)
                 elif plots_before.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
-                    Globles.titles.clear()
                     is_hold = True
-                    if not is_reset and not is_assisted:
-                        for plot in plots_before.get(bg_list[bg_index]):
-                            Globles.TitleText(plot[0], plot[1], 'black', plot[2])
-                elif not Globles.titles:
+                    Globles.titles.clear()
+                    for plot in plots_before.get(bg_list[bg_index]):
+                        Globles.TitleText(plot[0], plot[1], 'black', plot[2])
+                if not Globles.titles:
                     is_hold = False
                 if titles.get(bg_list[bg_index])[0][0] not in Globles.title_pool and not is_hold:
                     for title in titles.get(bg_list[bg_index]):
@@ -363,7 +391,7 @@ class FormGame:
                             Globles.TitleText(plot[0], plot[1], 'black', plot[2])
                     if "关卡完成" not in Globles.title_pool:
                         Globles.TitleText("关卡完成", "Level Finished", 'orange')
-                    if hero.rect.x > movable_limits.get(bg_list[bg_index])[1] - 50 and not Globles.titles:
+                    if hero.rect.x > movable_limits.get(bg_list[bg_index])[1] - hero.rect.width - 10 and not Globles.titles:
                         if bg_list[bg_index] == 'palace':
                             Globles.next_stage()
                         else:
@@ -372,6 +400,13 @@ class FormGame:
                             hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
                             Globles.next_wave()
                             Globles.title_pool.remove("关卡完成")
+                            is_reset = False
+                            if is_assisted:
+                                is_assisted = False
+                                Globles.remove_sprite(hero)
+                                hero = PygameObject.Character(hero_list[Globles.get_protagonist()], 30, 180)
+                                Globles.add_sprite(hero, 1)
+
 
             if Globles.get_stage() >= 1:
                 if not is_hold:
