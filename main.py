@@ -9,13 +9,13 @@ if __name__ == '__main__':
     # 初始化全局变量
     Globles.init()
     # 初始化开始页面
-    # FormHome.init()
+    FormHome.init()
     # 显示开始页面
-    # FormHome.display()
+    FormHome.display()
     # 初始化开始页面
-    # FormReady.init()
+    FormReady.init()
     # 显示开始页面
-    # FormReady.display()
+    FormReady.display()
     # 初始化游戏页面
     FormGame.init()
     # 显示游戏页面
