@@ -107,67 +107,52 @@ class FormGame:
                                    ('scorpion', 250, 210),
                                    ('bat', 150, 180)],
                    'treeleft': [('scorpion', 200, 360),
-                                ('scorpion', 220, 360),
+                                ('eyeball', 220, 360),
                                 ('scorpion', 240, 360),
-                                ('scorpion', 280, 360),
+                                ('eyeball', 280, 360),
                                 ('bat', 150, 340),
                                 ('bat', 250, 340),
                                 ('bat', 300, 340)],
-                   'treeright': [('scorpion', 200, 360),
-                                 ('scorpion', 220, 360),
+                   'treeright': [('slime', 200, 360),
+                                 ('eyeball', 220, 360),
                                  ('scorpion', 240, 360),
                                  ('scorpion', 280, 360),
-                                 ('scorpion', 320, 360),
+                                 ('slime', 320, 360),
                                  ('scorpion', 360, 360),
                                  ('bat', 150, 340),
                                  ('bat', 250, 340),
                                  ('bat', 300, 340)],
                    'fountain': [('scorpion', 200, 380),
-                                ('scorpion', 220, 380),
+                                ('slime', 220, 380),
                                 ('scorpion', 240, 380),
                                 ('scorpion', 280, 380),
-                                ('scorpion', 320, 380),
+                                ('slime', 320, 380),
                                 ('scorpion', 360, 380),
+                                ('eyeball', 380, 380),
+                                ('fishman', 400, 380),
                                 ('bat', 150, 360),
                                 ('bat', 200, 360),
                                 ('bat', 250, 360),
                                 ('bat', 300, 360),
                                 ('bat', 350, 360)],
                    'fountainnight': [('scorpion', 200, 380),
-                                    ('scorpion', 220, 380),
-                                    ('scorpion', 240, 380),
-                                    ('scorpion', 260, 380),
-                                    ('scorpion', 280, 380),
-                                    ('scorpion', 300, 380),
-                                    ('scorpion', 320, 380),
-                                    ('scorpion', 340, 380),
+                                     ('slime', 220, 380),
+                                     ('slime', 240, 380),
+                                     ('scorpion', 260, 380),
+                                     ('scorpion', 280, 380),
+                                     ('eyeball', 300, 380),
+                                     ('scorpion', 320, 380),
+                                     ('eyeball', 340, 380),
+                                     ('scorpion', 280, 380),
+                                     ('fishman', 300, 380),
+                                     ('scorpion', 320, 380),
+                                     ('dragon', 340, 380),
                                      ('bat', 150, 360),
                                      ('bat', 250, 360),
-                                     ('bat', 350, 360),
+                                     ('bat', 300, 360),
                                      ('bat', 400, 360),
-                                     ('bat', 450, 360),
-                                     ('bat', 500, 360),
-                                     ('bat', 550, 360)],
-                   'palace': [('scorpion', 200, 380),
-                                    ('scorpion', 220, 380),
-                                    ('scorpion', 240, 380),
-                                    ('scorpion', 260, 380),
-                                    ('scorpion', 280, 380),
-                                    ('scorpion', 300, 380),
-                                    ('scorpion', 320, 380),
-                                    ('scorpion', 340, 380),
-                                    ('scorpion', 400, 380),
-                                    ('scorpion', 450, 380),
-                                    ('scorpion', 500, 380),
-                                     ('bat', 150, 360),
-                                     ('bat', 250, 360),
-                                     ('bat', 350, 360),
-                                     ('bat', 400, 360),
-                                     ('bat', 450, 360),
-                                     ('bat', 500, 360),
-                                     ('bat', 550, 360),
-                                     ('bat', 600, 360),
-                                     ('bat', 650, 360)],
+                                     ('bat', 450, 360)],
+                   'palace': [('ltdz', 300, 350)],
                    }
 
         # 控制每关标题
@@ -180,22 +165,24 @@ class FormGame:
                   'palace': [("终章", "Final")]}
 
         # 控制剧情播放
-        plots_before = {'forestleft': [("{}和{}做好了准备，".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
-                                        "{} and {} get everything prepared".format(Globles.get_chara_name('prot', 'en'),
-                                                                                   Globles.get_chara_name('friend', 'en')),
-                                        20),
-                                       ("进入了小镇边的森林。",
-                                        "and went into the forest besides the town.",
-                                        20),
-                                       ("突然一只黑影从树丛中穿出，",
-                                        "Suddenly a shadow dashed from the bush,",
-                                        20),
-                                       ("{}定睛一看，是一只漆黑的蝙蝠，正向他冲来。".format(Globles.get_chara_name('prot', 'zh')),
-                                        "{} found that it was a black bat charging towards him.".format(Globles.get_chara_name('prot', 'en')),
-                                        20)],
+        plots_before = {'forestleft': [
+            ("{}和{}做好了准备，".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
+             "{} and {} get everything prepared".format(Globles.get_chara_name('prot', 'en'),
+                                                        Globles.get_chara_name('friend', 'en')),
+             20),
+            ("进入了小镇边的森林。",
+             "and went into the forest besides the town.",
+             20),
+            ("突然一只黑影从树丛中穿出，",
+             "Suddenly a shadow dashed from the bush,",
+             20),
+            ("{}定睛一看，是一只漆黑的蝙蝠，正向他冲来。".format(Globles.get_chara_name('prot', 'zh')),
+             "{} found that it was a black bat charging towards him.".format(Globles.get_chara_name('prot', 'en')),
+             20)],
                         'forestright': [("随着{}和{}逐渐深入森林,".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
-                                         "As {} and {} went further into the forest".format(Globles.get_chara_name('prot', 'en'),
-                                                                                            Globles.get_chara_name('friend', 'en')),
+                                         "As {} and {} went further into the forest".format(
+                                             Globles.get_chara_name('prot', 'en'),
+                                             Globles.get_chara_name('friend', 'en')),
                                          20),
                                         ("越来越多的魔物从阴影中涌现。",
                                          "more and more monsters emerged from the shades.",
@@ -204,21 +191,26 @@ class FormGame:
                                          "They raised their weapons and headed these monsters.",
                                          20),
                                         ("拯救{}的使命就在他们的身上".format(Globles.get_chara_name('place', 'zh')),
-                                         "The mission of saving {} is on their back.".format(Globles.get_chara_name('place', 'en')),
+                                         "The mission of saving {} is on their back.".format(
+                                             Globles.get_chara_name('place', 'en')),
                                          20), ],
-                        'treeleft': [("战前剧情_1_1", "Placeholder", 20)],
-                        'treeright': [("战前剧情_1_2", "Placeholder", 20)],
-                        'fountain': [("战前剧情_2_1", "Placeholder", 20)],
-                        'fountainnight': [("战前剧情_2_2", "Placeholder", 20)],
-                        'palace': [("战前剧情_终章", "Placeholder", 20)]}
+                        'treeleft': [("", "", 20)],
+                        'treeright': [("", "", 20)],
+                        'fountain': [("", "", 20)],
+                        'fountainnight': [("", "", 20)],
+                        'palace': [("历经万难，勇敢的英雄们终于来到魔王宫前，", "The brave hero finally reached the devil's palace,", 20),
+                                   ("他们面对的将是...", "they have to confront...", 20)]}
 
-        plots_after = {'forestleft': [("战后剧情_0_1", "Placeholder", 20)],
-                       'forestright': [("战后剧情_0_2", "Placeholder", 20)],
-                       'treeleft': [("战后剧情_1_1", "Placeholder", 20)],
-                       'treeright': [("战后剧情_1_2", "Placeholder", 20)],
-                       'fountain': [("战后剧情_2_1", "Placeholder", 20)],
-                       'fountainnight': [("战后剧情_2_2", "Placeholder", 20)],
-                       'palace': [("战后剧情_终章", "Placeholder", 20)]}
+        plots_after = {'forestleft': [("", "", 20)],
+                       'forestright': [("", "", 20)],
+                       'treeleft': [("", "", 20)],
+                       'treeright': [("", "", 20)],
+                       'fountain': [("", "", 20)],
+                       'fountainnight': [("", "", 20)],
+                       'palace': [("经历一番苦战，", "After a brutal fight,", 20),
+                                  ("英雄们终于打败了理塘纯真一郎", "LTDZ was finally defeated", 20),
+                                  ("麦克肯威的诅咒也被解开", "The curse of MacKenway was also removed", 20),
+                                  ("大家在镇上过上了幸福快乐的生活", "Everyone lived happily in the small town.", 20)]}
 
         # 控制每关移动范围
         movable_limits = {'forestleft': (0, 680, 180),
@@ -286,11 +278,18 @@ class FormGame:
                             is_assisted = True
                             is_reset = False
                             Globles.revive_hero()
-                            hero = PygameObject.Character(hero_list[3 if Globles.get_protagonist() == 1 else 1], 30, 180)
+                            hero = PygameObject.Character(hero_list[3 if Globles.get_protagonist() == 1 else 1], 30,
+                                                          180)
                             Globles.add_sprite(hero, 1)
                             hero.rect.x = movable_limits.get(bg_list[bg_index])[0]
                             hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
                             Globles.next_wave()
+                    if key_list[pygame.K_LALT] and key_list[pygame.K_RALT]:
+                        for enemy in Globles.get_monster_list():
+                            bullet = PygameObject.Bullet('bomb_ex', 0, False, 100, False, 100, False, 'Debug')
+                            bullet.rect.x = enemy.rect.x
+                            bullet.rect.y = enemy.rect.y
+                            Globles.add_bullet(bullet)
 
             bg = Globles.get_background_image(bg_list[bg_index])
             bg = pygame.transform.scale(bg, Globles.get_screen_size())
@@ -355,25 +354,27 @@ class FormGame:
                         if is_reset:
                             Globles.TitleText("过了一会，", "After a while,", 'black', 20)
                             Globles.TitleText("在他们返回营地休整一番之后，",
-                                            "After a preparation back in their camp,", 'black', 20)
+                                              "After a preparation back in their camp,", 'black', 20)
                             Globles.TitleText("{}和{}重新踏上了冒险的旅途".format(Globles.get_chara_name('prot', 'zh'), Globles.get_chara_name('friend', 'zh')),
-                                            "{} and {} returned to the adventure again.".format(
-                                                Globles.get_chara_name('prot', 'en'),
-                                                Globles.get_chara_name('friend', 'en')), 'black', 20)
+                                              "{} and {} returned to the adventure again.".format(
+                                                  Globles.get_chara_name('prot', 'en'),
+                                                  Globles.get_chara_name('friend', 'en')), 'black', 20)
                         else:
                             Globles.TitleText("过了一会，", "After a while,", 'black', 20)
                             Globles.TitleText("{}扶起倒地的{}，".format(Globles.get_chara_name('friend', 'zh'), Globles.get_chara_name('prot', 'zh')),
-                                            "{} helped {} to stand up again,".format(Globles.get_chara_name('friend', 'en'),
-                                                                                    Globles.get_chara_name('prot', 'en')),
-                                            'black', 20)
+                                              "{} helped {} to stand up again,".format(
+                                                  Globles.get_chara_name('friend', 'en'),
+                                                  Globles.get_chara_name('prot', 'en')),
+                                              'black', 20)
                             Globles.TitleText("并将他在营地安顿好，", "and settle him back at their camp,", 'black', 20)
                             Globles.TitleText("在他休整的时候替他净化前方的敌人，",
-                                            "assisting him to purify all enemies during his preparation.", 'black', 20)
+                                              "assisting him to purify all enemies during his preparation.", 'black',
+                                              20)
                 elif plots_before.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
                     is_hold = True
                     Globles.titles.clear()
                     for plot in plots_before.get(bg_list[bg_index]):
-                        Globles.TitleText(plot[0], plot[1], 'black', plot[2])
+                        Globles.TitleText(plot[0], plot[1], 'orange' if bg_index == 8 else 'black', plot[2])
                 if not Globles.titles:
                     is_hold = False
                 if titles.get(bg_list[bg_index])[0][0] not in Globles.title_pool and not is_hold:
@@ -388,7 +389,7 @@ class FormGame:
                     if plots_after.get(bg_list[bg_index])[0][0] not in Globles.title_pool:
                         Globles.titles.clear()
                         for plot in plots_after.get(bg_list[bg_index]):
-                            Globles.TitleText(plot[0], plot[1], 'black', plot[2])
+                            Globles.TitleText(plot[0], plot[1], 'orange' if bg_index == 8 else 'black', plot[2])
                     if "关卡完成" not in Globles.title_pool:
                         Globles.TitleText("关卡完成", "Level Finished", 'orange')
                     if hero.rect.x > movable_limits.get(bg_list[bg_index])[1] - hero.rect.width - 10 and not Globles.titles:
@@ -396,18 +397,19 @@ class FormGame:
                             Globles.next_stage()
                         else:
                             bg_index += 1
-                            hero.rect.x = movable_limits.get(bg_list[bg_index])[0]
-                            hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
-                            Globles.next_wave()
-                            Globles.title_pool.remove("关卡完成")
-                            is_reset = False
                             if is_assisted:
                                 is_assisted = False
                                 Globles.remove_sprite(hero)
                                 hero = PygameObject.Character(hero_list[Globles.get_protagonist()], 30, 180)
                                 Globles.add_sprite(hero, 1)
-
-
+                            hero.rect.x = movable_limits.get(bg_list[bg_index])[0]
+                            hero.rect.y = movable_limits.get(bg_list[bg_index])[2]
+                            Globles.next_wave()
+                            Globles.title_pool.remove("关卡完成")
+                            is_reset = False
+            elif Globles.get_stage() == 2:
+                if "剧终" not in Globles.title_pool:
+                    Globles.TitleText("剧终", "The END", "title_blue", 50)
             if Globles.get_stage() >= 1:
                 if not is_hold:
                     PygameObject.bulletMech()

@@ -98,9 +98,14 @@ class Globles:
         敌人属性
         [速度, 最大生命, 攻击力, 防御力]
         """
-        self._enemy_stat = {'bat': [2, 5, 1, 1],
-                            'scorpion': [1, 10, 2, 2],
-                            'stump': [0, 200, 0, 0]}
+        self._enemy_stat = {'bat': [2.5, 5, 1, 1],
+                            'scorpion': [1.5, 10, 2, 2],
+                            'slime': [2, 15, 1, 1],
+                            'eyeball': [3, 10, 3, 2],
+                            'fishman': [1.5, 25, 3, 3],
+                            'dragon': [1, 40, 5, 5],
+                            'stump': [0, 200, 0, 0],
+                            'ltdz': [0, 200, 15, 5]}
 
         """
         敌人素材
@@ -128,10 +133,6 @@ class Globles:
         for i in range(1, 4):
             self._enemy_images['dog'][0].append(pygame.image.load(self._enemy_path / "dog_{}.png".format(i)))
 
-        self._enemy_images['horse'] = [[]]
-        for i in range(1, 4):
-            self._enemy_images['horse'][0].append(pygame.image.load(self._enemy_path / "horse_{}.png".format(i)))
-
         self._enemy_images['sheep'] = [[]]
         for i in range(1, 4):
             self._enemy_images['sheep'][0].append(pygame.image.load(self._enemy_path / "sheep_{}.png".format(i)))
@@ -144,6 +145,27 @@ class Globles:
         for i in range(1, 4):
             self._enemy_images['scorpion'][0].append(pygame.image.load(self._enemy_path / "scorpion_{}.png".format(i)))
 
+        self._enemy_images['eyeball'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['eyeball'][0].append(pygame.image.load(self._enemy_path / "eyeball_{}.png".format(i)))
+
+        self._enemy_images['fishman'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['fishman'][0].append(pygame.image.load(self._enemy_path / "fishman_{}.png".format(i)))
+
+        self._enemy_images['slime'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['slime'][0].append(pygame.image.load(self._enemy_path / "slime_{}.png".format(i)))
+
+        self._enemy_images['dragon'] = [[]]
+        for i in range(1, 4):
+            self._enemy_images['dragon'][0].append(pygame.image.load(self._enemy_path / "dragon_{}.png".format(i)))
+
+        self._enemy_images['ltdz'] = [[], []]
+        for i in range(1, 4):
+            self._enemy_images['ltdz'][0].append(pygame.image.load(self._enemy_path / "ltdz_{}.png".format(i)))
+            self._enemy_images['ltdz'][1].append(pygame.image.load(self._enemy_path / "ltdz_{}.png".format(i + 3)))
+
         self._enemy_images['stump'] = [[]]
         for i in range(1, 10):
             self._enemy_images['stump'][0].append(pygame.image.load(self._enemy_path / "stump_{}.png".format(i)))
@@ -155,7 +177,11 @@ class Globles:
         self._effect_images = {'fireball': [],
                                'wind': [],
                                'purify': [],
-                               'explosion': []}
+                               'explosion': [],
+                               'bomb': [],
+                               'bomb_ex': [],
+                               'bomb_fall': [],
+                               'bomb_ex_fall': []}
         for i in range(1, 19):
             self._effect_images['fireball'].append(pygame.image.load(self._effect_path / "fireball_{}.png".format(i)))
         for i in range(1, 18):
@@ -164,6 +190,12 @@ class Globles:
             self._effect_images['purify'].append(pygame.image.load(self._effect_path / "purify_{}.png".format(i)))
         for i in range(1, 11):
             self._effect_images['explosion'].append(pygame.image.load(self._effect_path / "explosion_{}.png".format(i)))
+        for i in range(1, 7):
+            self._effect_images['bomb'].append(pygame.image.load(self._effect_path / "bomb_{}.png".format(i)))
+        for i in range(1, 7):
+            self._effect_images['bomb_ex'].append(pygame.image.load(self._effect_path / "bomb_ex_{}.png".format(i)))
+        self._effect_images['bomb_fall'].append(pygame.image.load(self._effect_path / "bomb_fall.png"))
+        self._effect_images['bomb_ex_fall'].append(pygame.image.load(self._effect_path / "bomb_ex_fall.png"))
 
         """
         背景素材
@@ -569,6 +601,7 @@ class Globles:
 
     def revive_hero(self):
         self._current_wave = self._last_wave - 1
+        self._is_defeated = False
         title_pool.clear()
         titles.clear()
         for monster in self._monster_list:

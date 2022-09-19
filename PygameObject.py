@@ -122,6 +122,13 @@ class Character(PygameObject):
                 if self.is_attacking == 1:
                     self.skill1_cast = pygame.time.get_ticks()
                 elif self.is_attacking == 2:
+                    if self.name == 'yichen':
+                        for enemy in self.attacked_list:
+                            life_steal = enemy.max_hp * 0.2
+                            if self.hp + life_steal > self.max_hp:
+                                Globles.add_buff(self, 'mhp_up', 10, round((self.hp + life_steal)/self.max_hp, 2))
+                            self.hp += life_steal
+                            enemy.damage(life_steal, self.name + "(Life Steal)")
                     self.skill2_cast = pygame.time.get_ticks()
                 self.is_attacking = -1
                 self.gesture = 0
@@ -229,10 +236,8 @@ class Character(PygameObject):
                                 Globles.add_buff(self, 'atk_up', 10, 2)
                                 Globles.add_buff(self, 'poison', 3, 1)
                                 Globles.add_buff(self, 'agi_up', 3, 2)
-                            elif ratio >= 0.4:
-                                Globles.add_buff(self, 'def_down', 10, 1.5)
+                            else:
                                 Globles.add_buff(self, 'atk_up', 10, 1.5)
-                                Globles.add_buff(self, 'poison', 3, 0.5)
                                 Globles.add_buff(self, 'agi_up', 3, 1.5)
                             self.bullet_launched = True
                     if self.is_attacking == 1:
@@ -249,9 +254,11 @@ class Character(PygameObject):
                                         self.attacked_list.append(enemy)
                                         if 'yin' not in enemy.buff_list.keys():
                                             Globles.add_buff(enemy, 'yin', -1)
+                                            Globles.add_buff(enemy, 'def_down', 5, 1.5)
                                             Globles.FloatText('YIN', 'purple', enemy.rect.x, enemy.rect.y, 200)
                                         elif enemy.buff_list['yin'][0] is not True:
                                             Globles.add_buff(enemy, 'yin', -1)
+                                            Globles.add_buff(enemy, 'def_down', 5, 1.5)
                                             Globles.FloatText('YIN', 'purple', enemy.rect.x, enemy.rect.y, 200)
                         elif image_index == 5:
                             self.attacked_list.clear()
@@ -268,9 +275,11 @@ class Character(PygameObject):
                                         self.attacked_list.append(enemy)
                                         if 'yang' not in enemy.buff_list.keys():
                                             Globles.add_buff(enemy, 'yang', -1)
+                                            Globles.add_buff(enemy, 'atk_down', 5, 1.5)
                                             Globles.FloatText('YANG', 'orange', enemy.rect.x, enemy.rect.y, 200)
                                         elif enemy.buff_list['yang'][0] is not True:
                                             Globles.add_buff(enemy, 'yang', -1)
+                                            Globles.add_buff(enemy, 'atk_down', 5, 1.5)
                                             Globles.FloatText('YANG', 'orange', enemy.rect.x, enemy.rect.y, 200)
 
         # 播放当前动作
@@ -403,6 +412,13 @@ class Character(PygameObject):
                     if self.rect.x + 10 < Globles.get_movable_area()[1]:
                         self.rect.x += 10
 
+        # 子弹碰撞攻击检测
+        bullet_collide = pygame.sprite.spritecollide(self, Globles.get_bullet_list(), False)
+        for bullet in bullet_collide:
+            if bullet.owner == 'ltdz':
+                self.damage(bullet.damage, "理塘纯真一郎的文化轰炸")
+                bullet.destroy()
+
 
 class Enemy(PygameObject):
     def __init__(self, enemy_name, x, y, purified=False) -> None:
@@ -422,6 +438,13 @@ class Enemy(PygameObject):
             self.attack = Globles.get_enemy_stat(enemy_name, 3)
             self.defence = Globles.get_enemy_stat(enemy_name, 4)
             self.buff_list = {}
+        if self.name == 'ltdz':
+            self.last_summon = -1
+            self.summon_cd = 5000
+            self.last_bomb = -1
+            self.bomb_cd = 7500
+            self.bomb_num = 3
+            self.bomb_ex_num = 0
 
     def damage(self, attack, source):
         # 受到伤害计算
@@ -437,15 +460,18 @@ class Enemy(PygameObject):
 
     def purify(self):
 
-        # 木桩子肯定不需要净化~
-        if self.name == 'stump':
+        if self.name == 'stump' or self.name == 'ltdz':
             Globles.remove_monster(self)
             del self
             return
 
         # 净化对应关系
         counterpart = {'bat': 'butterfly',
-                       'scorpion': 'cat'}
+                       'scorpion': 'cat',
+                       'eyeball': 'dog',
+                       'slime': 'chicken',
+                       'fishman': 'cow',
+                       'dragon': 'sheep'}
         # 被净化
         Globles.debug("敌人{}已被净化!".format(self.name), who='Sprites')
         Globles.remove_monster(self)
@@ -491,6 +517,15 @@ class Enemy(PygameObject):
 
         # 击败检测
         if self.hp <= 0:
+            if 'yin' in self.buff_list.keys() and 'yang' in self.buff_list.keys():
+                if self.buff_list['yin'][0] is True and self.buff_list['yang'][0] is True:
+                    self.buff_list['yin'] = (pygame.time.get_ticks() + 2000, 1)
+                    self.buff_list['yang'] = (pygame.time.get_ticks() + 2000, 1)
+                    Globles.FloatText('YIN·YANG', 'red', self.rect.x, self.rect.y, 125)
+                    bullet = Bullet('explosion', 0, self.reflect, 0, False, 100, False, 'yichen')
+                    bullet.rect.x = self.rect.x
+                    bullet.rect.y = self.rect.y
+                    Globles.add_bullet(bullet)
             self.purify()
             return
 
@@ -540,6 +575,57 @@ class Enemy(PygameObject):
             ShowHP(screen, self.rect.x, self.rect.y, self.hp, self.max_hp)
         show_buff(screen, self.rect.x, self.rect.y, self.buff_list)
 
+        # boss 特殊能力
+        if self.name == 'ltdz' and self.hp >= 0:
+            if self.last_bomb + 10000 < pygame.time.get_ticks():
+                self.last_bomb = pygame.time.get_ticks()
+                for i in range(0, self.bomb_num):
+                    bullet = Bullet('bomb_fall', 0, self.reflect, 0, True, -1, False, 'ltdz')
+                    bullet.rect.x = random.randint(0, 700)
+                    bullet.rect.y = -50
+                    Globles.add_bullet(bullet)
+                for i in range(0, self.bomb_ex_num):
+                    bullet = Bullet('bomb_ex_fall', 0, self.reflect, 0, True, -1, False, 'ltdz')
+                    bullet.rect.x = random.randint(0, 700)
+                    bullet.rect.y = -50
+                    Globles.add_bullet(bullet)
+            if self.last_summon + self.summon_cd < pygame.time.get_ticks():
+                self.last_summon = pygame.time.get_ticks()
+                enemy_list = ['slime', 'scorpion', 'eyeball', 'fishman', 'dragon']
+                spawn_enemy(enemy_list[random.randint(0, 2)], self.rect.x + random.randint(-100, 100), self.rect.y + 30)
+                if self.hp <= self.max_hp * 0.5:
+                    spawn_enemy(enemy_list[random.randint(0, 4)], self.rect.x + random.randint(-100, 100), self.rect.y + 30)
+                if self.hp <= self.max_hp * 0.3:
+                    spawn_enemy(enemy_list[random.randint(2, 4)], self.rect.x + random.randint(-100, 100), self.rect.y + 30)
+
+            if self.hp <= self.max_hp * 0.75 and "已进入第二阶段！" not in Globles.title_pool:
+                Globles.TitleText("已进入第二阶段！", "Enter Stage II!", 'red')
+                Globles.FloatText("轰炸技能冷却时间减少", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("轰炸技能增强", 'green', self.rect.x, self.rect.y)
+                self.bomb_ex_num = 1
+                self.bomb_num = 5
+                self.bomb_cd = 5000
+            elif self.hp <= self.max_hp * 0.5 and "已进入第三阶段！" not in Globles.title_pool:
+                Globles.TitleText("已进入第三阶段！", "Enter Stage III!", 'red')
+                Globles.FloatText("轰炸技能冷却时间减少", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("轰炸技能增强", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("召唤技能冷却时间减少", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("召唤技能增强", 'green', self.rect.x, self.rect.y)
+                self.bomb_ex_num = 3
+                self.bomb_num = 7
+                self.bomb_cd = 3000
+                self.summon_cd = 3000
+            elif self.hp <= self.max_hp * 0.3 and "已进入最终阶段！" not in Globles.title_pool:
+                Globles.TitleText("已进入最终阶段！", "Enter Final Stage!", 'red')
+                Globles.FloatText("轰炸技能冷却时间减少", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("轰炸技能增强", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("召唤技能冷却时间减少", 'green', self.rect.x, self.rect.y)
+                Globles.FloatText("召唤技能增强", 'green', self.rect.x, self.rect.y)
+                self.bomb_ex_num = 5
+                self.bomb_num = 10
+                self.bomb_cd = 1500
+                self.summon_cd = 2000
+
 
 class Bullet(pygame.sprite.Sprite):
     """ This class represents the bullet . """
@@ -568,13 +654,30 @@ class Bullet(pygame.sprite.Sprite):
                 enemy.damage(10, "{}的{}".format(self.owner, self.name))
                 if random.randint(0, 1) == 0:
                     Globles.add_buff(enemy, 'yin', -1)
+                    Globles.add_buff(enemy, 'def_down', 5, 1.5)
                     Globles.FloatText('YIN·Ω', 'purple', enemy.rect.x, enemy.rect.y, 200)
                 else:
                     Globles.add_buff(enemy, 'yang', -1)
+                    Globles.add_buff(enemy, 'atk_down', 5, 1.5)
                     Globles.FloatText('YANG·Ω', 'orange', enemy.rect.x, enemy.rect.y, 200)
+        elif self.name == 'bomb_fall':
+            bullet = Bullet('bomb', 0, self.reflect, 5, False, 200, True, 'ltdz')
+            bullet.rect.x = self.rect.x
+            bullet.rect.y = self.rect.y
+            Globles.add_bullet(bullet)
+        elif self.name == 'bomb_ex_fall':
+            bullet = Bullet('bomb_ex', 0, self.reflect, 10, False, 200, True, 'ltdz')
+            bullet.rect.x = self.rect.x
+            bullet.rect.y = self.rect.y
+            Globles.add_bullet(bullet)
         Globles.remove_bullet(self)
 
     def update(self, screen):
+        if self.name in ['bomb_fall', 'bomb_ex_fall']:
+            self.rect.y += 5
+            if self.rect.y == 400:
+                self.destroy()
+            return
         if self.reflect:
             self.rect.x -= self.speed
         else:
@@ -665,6 +768,8 @@ def bulletMech():
         # Remove the bullet if it flies up off the screen
         if not 0 < bullet.rect.x < screen_w or not 0 < bullet.rect.y < screen_h and bullet.self_destroy:
             Globles.remove_bullet(bullet)
+        if bullet.owner == 'ltdz':
+            continue
         for enemy in enemy_hit_list:
             enemy.damage(bullet.damage, "{}的{}".format(bullet.owner, bullet.name))
             if bullet.self_destroy:
